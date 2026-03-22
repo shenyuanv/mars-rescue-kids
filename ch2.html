@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>火星种土豆 · 第二章：一个人的火星</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Ma+Shan+Zheng&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --page-bg: #1a0a0a;
+    --text-primary: #f5f0e8;
+    --text-dark: #2d2d2d;
+    --accent-warm: #ff6b35;
+    --accent-red: #e74c3c;
+    --accent-blue: #4ecdc4;
+    --accent-yellow: #ffe66d;
+    --accent-green: #2ecc71;
+    --bubble-bg: rgba(255, 255, 255, 0.92);
+    --science-bg: rgba(30, 60, 114, 0.95);
+    --analogy-bg: rgba(255, 107, 53, 0.95);
+    --quiz-bg: rgba(20, 80, 60, 0.95);
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'ZCOOL KuaiLe', 'Ma Shan Zheng', sans-serif;
+    background: var(--page-bg);
+    touch-action: pan-y;
+    -webkit-user-select: none; user-select: none;
+  }
+
+  .book { width: 100%; height: 100%; position: relative; overflow: hidden; }
+
+  .page {
+    position: absolute; width: 100%; height: 100%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    opacity: 0; transform: translateX(100%);
+    transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    pointer-events: none; overflow: hidden;
+  }
+  .page.active { opacity: 1; transform: translateX(0); pointer-events: all; }
+  .page.prev { opacity: 0; transform: translateX(-100%); }
+
+  .page-illustration {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    object-fit: cover; z-index: 0;
+  }
+
+  /* Cover */
+  .cover { background: linear-gradient(135deg, #1a0a0a, #4a1a1a, #2d1b1b); }
+  .cover-title {
+    font-size: clamp(2.5rem, 8vw, 5rem); color: var(--accent-yellow);
+    text-shadow: 3px 3px 0 rgba(0,0,0,0.3); z-index: 2; text-align: center; line-height: 1.3;
+  }
+  .cover-subtitle {
+    font-size: clamp(1rem, 3vw, 1.8rem); color: var(--text-primary);
+    opacity: 0.8; margin-top: 1rem; z-index: 2;
+  }
+  .cover-chapter {
+    font-size: clamp(1.2rem, 3.5vw, 2rem); color: var(--accent-warm);
+    margin-top: 2rem; z-index: 2;
+  }
+  .cover-tap {
+    position: absolute; bottom: 8%;
+    font-size: clamp(0.9rem, 2.5vw, 1.2rem); color: var(--text-primary);
+    opacity: 0.5; animation: pulse 2s infinite; z-index: 2;
+  }
+  @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.7; } }
+
+  .stars { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+  .star {
+    position: absolute; background: white; border-radius: 50%;
+    animation: twinkle var(--duration) infinite;
+  }
+  @keyframes twinkle { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
+
+  /* Text Bubbles */
+  .text-bubble {
+    position: relative; z-index: 10;
+    background: var(--bubble-bg); color: var(--text-dark);
+    padding: clamp(1rem, 3vw, 2rem) clamp(1.5rem, 4vw, 2.5rem);
+    border-radius: 24px; max-width: 80%;
+    font-size: clamp(1.1rem, 3vw, 1.6rem); line-height: 1.8;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3); border: 3px solid #333;
+  }
+  .text-bubble.narrator {
+    background: rgba(0,0,0,0.7); color: var(--text-primary);
+    border-color: var(--accent-yellow); border-width: 2px;
+  }
+  .text-bubble.mark {
+    background: rgba(255, 107, 53, 0.15); color: var(--text-primary);
+    border-color: var(--accent-warm); border-width: 2px;
+  }
+  .text-bubble .highlight { color: var(--accent-warm); font-weight: bold; }
+  .text-bubble .highlight-blue { color: var(--accent-blue); font-weight: bold; }
+  .text-bubble .highlight-green { color: var(--accent-green); font-weight: bold; }
+
+  /* Science Panel */
+  .science-panel { position: relative; z-index: 10; width: 85%; max-width: 900px; }
+  .science-main {
+    background: var(--science-bg); color: var(--text-primary);
+    padding: clamp(1.2rem, 3vw, 2rem) clamp(1.5rem, 4vw, 2.5rem);
+    border-radius: 20px; font-size: clamp(1rem, 2.5vw, 1.4rem); line-height: 2;
+    border: 3px solid var(--accent-blue); box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
+  .science-main h3 {
+    color: var(--accent-yellow); font-size: clamp(1.3rem, 3.5vw, 1.8rem);
+    margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem;
+  }
+  .science-main .term { color: var(--accent-blue); font-weight: bold; }
+
+  .analogy-btn {
+    display: inline-block; margin-top: 1rem; padding: 0.6rem 1.5rem;
+    background: var(--accent-warm); color: white; border: none; border-radius: 30px;
+    font-family: inherit; font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+    cursor: pointer; box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+  }
+  .analogy-btn:active { transform: scale(0.95); }
+  .analogy-box {
+    margin-top: 1rem; background: var(--analogy-bg); color: white;
+    padding: clamp(1rem, 2.5vw, 1.5rem); border-radius: 16px;
+    font-size: clamp(1rem, 2.5vw, 1.3rem); line-height: 1.8;
+    display: none; animation: slideDown 0.4s ease; border: 2px dashed var(--accent-yellow);
+  }
+  .analogy-box.show { display: block; }
+  @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+  .analogy-box .emoji { font-size: 1.5em; }
+
+  /* Interactive Panels */
+  .interactive-panel {
+    position: relative; z-index: 10; width: 85%; max-width: 800px;
+    background: rgba(0,0,0,0.5); border-radius: 20px; padding: clamp(1rem, 3vw, 2rem);
+    border: 3px solid var(--accent-blue);
+  }
+  .interactive-panel h3 {
+    color: var(--accent-yellow); font-size: clamp(1.2rem, 3vw, 1.6rem); margin-bottom: 1rem;
+  }
+  .interactive-panel .question {
+    font-size: clamp(1.1rem, 2.8vw, 1.5rem); color: var(--text-primary); line-height: 1.8; margin-bottom: 1rem;
+  }
+
+  /* Calorie Drag Game */
+  .calorie-game { display: flex; flex-direction: column; gap: 1rem; }
+  .food-shelf {
+    display: flex; flex-wrap: wrap; gap: 0.8rem; justify-content: center;
+    min-height: 4rem;
+  }
+  .food-item {
+    display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
+    padding: 0.6rem; border-radius: 12px; cursor: pointer;
+    border: 2px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.08);
+    transition: all 0.3s; min-width: clamp(3.5rem, 10vw, 5rem);
+  }
+  .food-item:active { transform: scale(0.9); }
+  .food-item.selected { border-color: var(--accent-green); background: rgba(46, 204, 113, 0.2); }
+  .food-item .food-emoji { font-size: clamp(1.5rem, 4vw, 2.5rem); }
+  .food-item .food-cal { font-size: clamp(0.7rem, 1.8vw, 0.9rem); color: var(--accent-yellow); }
+  .food-item .food-name { font-size: clamp(0.65rem, 1.6vw, 0.8rem); color: rgba(255,255,255,0.7); }
+
+  .calorie-bar {
+    width: 100%; height: 35px; background: rgba(255,255,255,0.1);
+    border-radius: 18px; overflow: hidden; position: relative;
+  }
+  .calorie-fill {
+    height: 100%; border-radius: 18px; transition: width 0.4s ease;
+    display: flex; align-items: center; justify-content: center;
+    font-size: clamp(0.8rem, 2vw, 1rem); color: white; font-weight: bold;
+  }
+  .calorie-fill.low { background: linear-gradient(90deg, #e74c3c, #e67e22); }
+  .calorie-fill.mid { background: linear-gradient(90deg, #e67e22, #f1c40f); }
+  .calorie-fill.good { background: linear-gradient(90deg, #2ecc71, #27ae60); }
+  .calorie-fill.over { background: linear-gradient(90deg, #9b59b6, #8e44ad); }
+
+  .calorie-target {
+    font-size: clamp(0.9rem, 2.2vw, 1.1rem); color: var(--text-primary);
+    text-align: center; margin-top: 0.5rem;
+  }
+  .calorie-result {
+    font-size: clamp(1rem, 2.5vw, 1.3rem); color: var(--accent-yellow);
+    text-align: center; margin-top: 0.5rem; min-height: 2em;
+  }
+
+  /* Division Game */
+  .division-game { text-align: center; }
+  .food-grid {
+    display: flex; flex-wrap: wrap; gap: 4px; justify-content: center;
+    margin: 1rem 0; max-height: 40vh; overflow-y: auto;
+  }
+  .food-packet {
+    width: clamp(1rem, 2.5vw, 1.5rem); height: clamp(1rem, 2.5vw, 1.5rem);
+    background: var(--accent-warm); border-radius: 3px; transition: all 0.1s;
+  }
+  .food-packet.eaten { background: rgba(255,255,255,0.1); }
+  .day-controls {
+    display: flex; align-items: center; justify-content: center; gap: 1rem; margin: 1rem 0;
+  }
+  .day-btn {
+    padding: 0.6rem 1.5rem; background: var(--accent-blue); color: white;
+    border: none; border-radius: 30px; font-family: inherit;
+    font-size: clamp(1rem, 2.5vw, 1.3rem); cursor: pointer;
+  }
+  .day-btn:active { transform: scale(0.95); }
+  .day-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .day-counter {
+    font-size: clamp(1.2rem, 3vw, 1.6rem); color: var(--accent-yellow); min-width: 8rem;
+  }
+  .division-answer {
+    margin-top: 1rem; display: flex; align-items: center; justify-content: center; gap: 0.8rem;
+  }
+  .answer-input {
+    width: 5rem; padding: 0.5rem; border-radius: 12px; border: 2px solid var(--accent-blue);
+    background: rgba(255,255,255,0.1); color: var(--text-primary);
+    font-family: inherit; font-size: clamp(1.2rem, 3vw, 1.5rem); text-align: center;
+  }
+  .answer-btn {
+    padding: 0.5rem 1.2rem; background: var(--accent-green); color: white;
+    border: none; border-radius: 12px; font-family: inherit;
+    font-size: clamp(1rem, 2.5vw, 1.2rem); cursor: pointer;
+  }
+  .answer-btn:active { transform: scale(0.95); }
+
+  /* Timeline Gap */
+  .timeline-container {
+    width: 100%; margin: 1rem 0;
+  }
+  .timeline-bar {
+    width: 100%; height: 40px; background: rgba(255,255,255,0.1);
+    border-radius: 20px; position: relative; overflow: visible;
+  }
+  .timeline-food {
+    position: absolute; left: 0; top: 0; height: 100%;
+    background: linear-gradient(90deg, var(--accent-green), #e67e22);
+    border-radius: 20px 0 0 20px; display: flex; align-items: center;
+    justify-content: center; font-size: clamp(0.75rem, 2vw, 0.95rem);
+    color: white; font-weight: bold; transition: width 1s ease;
+  }
+  .timeline-rescue {
+    position: absolute; right: 0; top: -8px; bottom: -8px;
+    width: 4px; background: var(--accent-yellow);
+  }
+  .timeline-rescue-label {
+    position: absolute; right: 0; top: -2rem;
+    font-size: clamp(0.8rem, 2vw, 1rem); color: var(--accent-yellow); white-space: nowrap;
+  }
+  .timeline-labels {
+    display: flex; justify-content: space-between; margin-top: 0.5rem;
+    font-size: clamp(0.8rem, 2vw, 1rem); color: rgba(255,255,255,0.5);
+  }
+  .gap-question {
+    margin-top: 1.5rem; display: flex; align-items: center; justify-content: center; gap: 0.8rem; flex-wrap: wrap;
+  }
+  .gap-label { font-size: clamp(1rem, 2.5vw, 1.3rem); color: var(--text-primary); }
+  .gap-result {
+    font-size: clamp(1.1rem, 2.8vw, 1.4rem); color: var(--accent-yellow);
+    text-align: center; margin-top: 0.8rem; min-height: 2em;
+  }
+
+  /* Navigation */
+  .nav-area {
+    position: absolute; top: 0; width: 25%; height: 100%; z-index: 50; cursor: pointer;
+  }
+  .nav-area.left { left: 0; }
+  .nav-area.right { right: 0; }
+  .nav-hint {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    font-size: 2.5rem; color: white; opacity: 0; transition: opacity 0.3s; pointer-events: none;
+  }
+  .nav-area:hover .nav-hint { opacity: 0.5; }
+  .nav-area.left .nav-hint { left: 1rem; }
+  .nav-area.right .nav-hint { right: 1rem; }
+
+  .page-counter {
+    position: fixed; bottom: 1.5%; left: 50%; transform: translateX(-50%);
+    z-index: 100; display: flex; gap: 8px;
+  }
+  .page-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: rgba(255,255,255,0.3); transition: all 0.3s;
+  }
+  .page-dot.active { background: var(--accent-yellow); transform: scale(1.3); }
+
+  .potato-counter {
+    position: fixed; top: 1.5%; right: 1.5%; z-index: 200;
+    background: rgba(0,0,0,0.6); padding: 0.4rem 0.8rem; border-radius: 20px;
+    font-size: clamp(0.9rem, 2.5vw, 1.2rem); color: var(--accent-yellow);
+    border: 2px solid rgba(255,230,109,0.3);
+  }
+
+  .content-bottom {
+    position: absolute; bottom: 8%; width: 100%;
+    display: flex; flex-direction: column; align-items: center; z-index: 10;
+  }
+  .content-center {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 100%; display: flex; flex-direction: column; align-items: center; z-index: 10;
+  }
+
+  @media (orientation: portrait) {
+    .text-bubble { max-width: 90%; }
+    .science-panel, .interactive-panel { width: 92%; }
+  }
+
+  .ch-link {
+    display: inline-block; margin-top: 0.5rem; padding: 0.8rem 2rem;
+    background: var(--accent-warm); color: #fff; border-radius: 30px;
+    text-decoration: none; font-size: 1.1em;
+    box-shadow: 0 4px 12px rgba(255,107,53,0.4);
+  }
+  .ch-link-back {
+    display: inline-block; margin-top: 0.3rem; padding: 0.5rem 1.2rem;
+    background: rgba(255,255,255,0.15); color: var(--text-primary); border-radius: 20px;
+    text-decoration: none; font-size: 0.9em;
+  }
+</style>
+</head>
+<body>
+
+<div class="book" id="book">
+
+  <!-- Page 0: Cover -->
+  <div class="page cover active" data-page="0">
+    <div class="stars" id="cover-stars"></div>
+    <div class="cover-title">🥔 火星种土豆</div>
+    <div class="cover-subtitle">第二章</div>
+    <div class="cover-chapter">一个人的火星 🧑‍🚀</div>
+    <div class="cover-tap">👆 点击右边翻页</div>
+  </div>
+
+  <!-- Page 1: Alone on Mars -->
+  <div class="page" data-page="1" style="background: linear-gradient(180deg, #1a0a0a 0%, #3d1a1a 50%, #2d1b1b 100%);">
+    <img class="page-illustration" src="images/ch2-counting.png" alt="" onerror="this.style.display='none'">
+    <div class="content-bottom">
+      <div class="text-bubble narrator">
+        马克关好基地的门，<br>
+        终于可以脱下沉重的宇航服了。<br><br>
+        他环顾四周——<br>
+        基地里有床、有电脑、有氧气制造机……<br><br>
+        还有一个储物间，<br>
+        里面整整齐齐地码着<span class="highlight">食物包</span> 📦📦📦<br><br>
+        "好，先数数有多少吃的。"
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 2: Science — Why We Eat -->
+  <div class="page" data-page="2" style="background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);">
+    <div class="stars" id="science-stars-1"></div>
+    <img class="page-illustration" src="images/ch2-energy.png" alt="" style="opacity:0.25;" onerror="this.style.display='none'">
+    <div class="content-center">
+      <div class="science-panel">
+        <div class="science-main">
+          <h3>🔬 科学时间：人为什么要吃东西？</h3>
+          <p>
+            你的身体就像一辆<span class="term">小汽车</span> 🚗<br>
+            食物就是你的<span class="term">汽油</span> ⛽
+          </p>
+          <p>
+            不吃东西 → 没力气走路、没力气思考<br>
+            就像车没油了，<span class="term">跑不动</span>！
+          </p>
+          <p>
+            食物里的能量叫 <span class="term">"卡路里"</span><br>
+            一个大人每天大约需要 <span class="term">2000 卡路里</span><br>
+            一碗米饭大约 200 卡路里<br>
+            所以一天至少要吃相当于 <span class="term">10 碗米饭</span> 的能量！
+          </p>
+
+          <button class="analogy-btn" onclick="toggleAnalogy('analogy-cal')">
+            🤔 什么是卡路里？点这里
+          </button>
+          <div class="analogy-box" id="analogy-cal">
+            <span class="emoji">🔥</span> "卡路里"就是<b>能量的计量单位</b>——<br><br>
+            就像你用"厘米"量身高，<br>
+            用"公斤"量体重，<br>
+            用 <b>"卡路里"</b> 量食物里有多少能量！<br><br>
+            <span class="emoji">🍚</span> 一碗米饭 ≈ 200 卡路里<br>
+            <span class="emoji">🥔</span> 一个土豆 ≈ 150 卡路里<br>
+            <span class="emoji">🍫</span> 一块巧克力 ≈ 250 卡路里<br><br>
+            马克每天需要 2000 卡路里——<br>
+            因为他要走路、搬东西、动脑子想办法活下去！<span class="emoji">🧠</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 3: Interactive — Calorie Plate -->
+  <div class="page" data-page="3" style="background: linear-gradient(180deg, #0d1b2a 0%, #1b2838 100%);">
+    <div class="content-center">
+      <div class="interactive-panel" style="border-color: var(--accent-green);">
+        <h3>🍽️ 帮马克装满一天的能量！</h3>
+        <div class="question">
+          点击食物放到马克的盘子里<br>
+          目标：凑够 <span class="highlight">2000 卡路里</span>
+        </div>
+
+        <div class="calorie-game">
+          <div class="food-shelf" id="food-shelf">
+            <div class="food-item" onclick="addFood(this, 200)" data-cal="200">
+              <div class="food-emoji">🍚</div>
+              <div class="food-cal">200卡</div>
+              <div class="food-name">米饭</div>
+            </div>
+            <div class="food-item" onclick="addFood(this, 150)" data-cal="150">
+              <div class="food-emoji">🥔</div>
+              <div class="food-cal">150卡</div>
+              <div class="food-name">土豆</div>
+            </div>
+            <div class="food-item" onclick="addFood(this, 300)" data-cal="300">
+              <div class="food-emoji">🥩</div>
+              <div class="food-cal">300卡</div>
+              <div class="food-name">蛋白棒</div>
+            </div>
+            <div class="food-item" onclick="addFood(this, 250)" data-cal="250">
+              <div class="food-emoji">🍫</div>
+              <div class="food-cal">250卡</div>
+              <div class="food-name">巧克力</div>
+            </div>
+            <div class="food-item" onclick="addFood(this, 100)" data-cal="100">
+              <div class="food-emoji">🍎</div>
+              <div class="food-cal">100卡</div>
+              <div class="food-name">苹果</div>
+            </div>
+            <div class="food-item" onclick="addFood(this, 350)" data-cal="350">
+              <div class="food-emoji">🍝</div>
+              <div class="food-cal">350卡</div>
+              <div class="food-name">意面</div>
+            </div>
+          </div>
+
+          <div class="calorie-bar">
+            <div class="calorie-fill low" id="calorie-fill" style="width: 0%;">
+              <span id="calorie-text">0</span>
+            </div>
+          </div>
+          <div class="calorie-target">目标：2000 卡路里 | 已选：<span id="cal-count">0</span> 卡</div>
+          <div class="calorie-result" id="calorie-result"></div>
+          <div style="text-align:center; margin-top:0.5rem;">
+            <button class="day-btn" onclick="resetCalories()" style="background:var(--accent-warm);font-size:0.9rem;padding:0.4rem 1rem;">🔄 重新来</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 4: Counting Food -->
+  <div class="page" data-page="4" style="background: linear-gradient(180deg, #1a0a0a 0%, #3d1a1a 50%, #2d1b1b 100%);">
+    <img class="page-illustration" src="images/ch2-counting.png" alt="" style="opacity:0.4;" onerror="this.style.display='none'">
+    <div class="content-bottom">
+      <div class="text-bubble mark">
+        马克数完了所有食物包：<br><br>
+        📦 一共有 <span class="highlight">300 份</span>！<br><br>
+        他每天吃 <span class="highlight-blue">3 份</span>（早餐1份、午餐1份、晚餐1份）<br><br>
+        <span class="highlight">"300 份……每天吃 3 份……<br>
+        我来算算能吃多少天。"</span> 🤔
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 5: Interactive — Division -->
+  <div class="page" data-page="5" style="background: linear-gradient(180deg, #0d1b2a 0%, #1b2838 100%);">
+    <div class="content-center">
+      <div class="interactive-panel">
+        <h3>🧮 帮马克算一算！</h3>
+        <div class="question">
+          <span class="highlight">300 份</span>食物，每天吃 <span class="highlight-blue">3 份</span><br>
+          够吃多少天？<br>
+          <span style="font-size:0.85em; opacity:0.7;">👆 点"过一天"看食物消耗，或者直接输入答案</span>
+        </div>
+
+        <div class="division-game">
+          <div class="food-grid" id="food-grid"></div>
+
+          <div class="day-controls">
+            <button class="day-btn" id="day-btn" onclick="eatOneDay()">🍽️ 过一天</button>
+            <div class="day-counter">第 <span id="day-count">0</span> 天 | 剩 <span id="food-left">300</span> 份</div>
+          </div>
+
+          <div class="division-answer">
+            <span class="gap-label">300 ÷ 3 =</span>
+            <input class="answer-input" id="division-answer" type="number" placeholder="?" inputmode="numeric">
+            <button class="answer-btn" onclick="checkDivision()">✓</button>
+          </div>
+          <div class="gap-result" id="division-result"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 6: But... -->
+  <div class="page" data-page="6" style="background: linear-gradient(180deg, #1a0a0a 0%, #2d1b1b 50%, #3d1a1a 100%);">
+    <img class="page-illustration" src="images/ch2-calendar.png" alt="" onerror="this.style.display='none'">
+    <div class="content-bottom">
+      <div class="text-bubble mark">
+        "好，100 天的食物。" 马克点点头。<br><br>
+        然后他打开电脑，查了一下：<br><br>
+        <span style="font-family: monospace; color: #4ecdc4; font-size: 1.05em;">
+        　　下一次火星任务抵达时间：<br>
+        　　约 400 天后 📅
+        </span><br><br>
+        马克的脸色一下子变了 😰<br><br>
+        <span class="highlight">"100 天的吃的……要撑 400 天？！"</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 7: Interactive — The Gap -->
+  <div class="page" data-page="7" style="background: linear-gradient(180deg, #0d1b2a 0%, #1b2838 100%);">
+    <div class="content-center">
+      <div class="interactive-panel" style="border-color: var(--accent-warm);">
+        <h3>📅 差多少天？</h3>
+        <div class="question">
+          食物够吃 <span class="highlight-green">100 天</span><br>
+          飞船要 <span class="highlight">400 天</span> 才来
+        </div>
+
+        <div class="timeline-container">
+          <div class="timeline-bar">
+            <div class="timeline-food" id="timeline-food" style="width: 0%;">100天 🍽️</div>
+            <div class="timeline-rescue"></div>
+            <div class="timeline-rescue-label">🚀 飞船 400天</div>
+          </div>
+          <div class="timeline-labels">
+            <span>第 0 天</span>
+            <span>第 100 天</span>
+            <span>第 200 天</span>
+            <span>第 300 天</span>
+            <span>第 400 天</span>
+          </div>
+        </div>
+
+        <div class="gap-question">
+          <span class="gap-label">400 - 100 = 还缺</span>
+          <input class="answer-input" id="gap-answer" type="number" placeholder="?" inputmode="numeric">
+          <button class="answer-btn" onclick="checkGap()">✓</button>
+        </div>
+        <div class="gap-result" id="gap-result"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 8: Mark's Idea -->
+  <div class="page" data-page="8" style="background: linear-gradient(180deg, #1a0a0a 0%, #3d2a1a 50%, #2d1b1b 100%);">
+    <img class="page-illustration" src="images/ch2-potato-idea.png" alt="" onerror="this.style.display='none'">
+    <div class="content-bottom">
+      <div class="text-bubble mark">
+        马克坐在椅子上，盯着天花板想了很久。<br><br>
+        还缺 300 天的食物……<br>
+        没有超市，没有外卖，没有任何人能帮他。<br><br>
+        突然，他的目光落在了桌上的一样东西——<br><br>
+        <span style="font-size: 2em;">🥔</span><br><br>
+        一颗<span class="highlight">土豆</span>！！！<br><br>
+        <span class="highlight">"我是植物学家！<br>我可以自己种！"</span> 😤💪
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 9: Science — Why Potato -->
+  <div class="page" data-page="9" style="background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);">
+    <div class="stars" id="science-stars-2"></div>
+    <div class="content-center">
+      <div class="science-panel">
+        <div class="science-main">
+          <h3>🔬 科学时间：为什么选土豆？</h3>
+          <p>
+            马克是<span class="term">植物学家</span>——专门研究植物的科学家 🌿
+          </p>
+          <p>
+            他选土豆，因为土豆有<span class="term">三个超能力</span>：
+          </p>
+          <p>
+            1️⃣ <span class="term">长得快</span> — 60-90天就能收获<br>
+            2️⃣ <span class="term">能量高</span> — 一个大土豆有约 150 卡路里<br>
+            3️⃣ <span class="term">容易种</span> — 切一小块带"芽眼"的土豆，埋进土里就能长出新的！
+          </p>
+
+          <button class="analogy-btn" onclick="toggleAnalogy('analogy-potato')">
+            🤔 土豆怎么繁殖？点这里
+          </button>
+          <div class="analogy-box" id="analogy-potato">
+            <span class="emoji">🥔</span> 你知道吗？土豆可以<b>不用种子</b>就繁殖！<br><br>
+            土豆表面有小小的凹点，叫 <b>"芽眼"</b> 👁️<br>
+            只要把一块带芽眼的土豆埋进土里——<br>
+            芽眼就会长出新芽 🌱 → 长出茎和叶子 🌿<br>
+            → 根部长出好几个<b>新土豆</b>！<br><br>
+            一颗土豆能变成 <b>4-8 颗</b> 新土豆！<br>
+            就像变魔术一样 <span class="emoji">✨</span><br><br>
+            所以马克只需要少量土豆做"种子"，<br>
+            就能不断种出更多更多的土豆！
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 10: End -->
+  <div class="page" data-page="10" style="background: linear-gradient(180deg, #000 0%, #1a0a2e 50%, #2d1b69 100%);">
+    <div class="stars" id="end-stars"></div>
+    <div class="content-center">
+      <div class="text-bubble narrator" style="text-align: center;">
+        马克决定了——<br>
+        <span class="highlight">在火星上种土豆！</span> 🥔🌱<br><br>
+        一个人，一颗土豆，一个火星基地。<br>
+        他要用<span class="highlight-blue">科学</span>养活自己。<br><br>
+        <span style="font-size: 1.3em;">下一章：火星农场 🌱</span><br>
+        <span style="font-size: 0.9em; opacity: 0.6;">马克要算面积、准备土壤、种下第一批土豆……<br>
+        但火星的土能种东西吗？🤔</span><br><br>
+        <a class="ch-link" href="ch3.html">下一章 →</a><br>
+        <a class="ch-link-back" href="ch1.html">← 上一章</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Potato Counter -->
+<div class="potato-counter" id="potato-counter">🥔 × <span id="potato-count">0</span></div>
+
+<!-- Navigation -->
+<div class="nav-area left" onclick="prevPage()"><div class="nav-hint">‹</div></div>
+<div class="nav-area right" onclick="nextPage()"><div class="nav-hint">›</div></div>
+<div class="page-counter" id="page-counter"></div>
+
+<script>
+  // === Book Engine ===
+  const pages = document.querySelectorAll('.page');
+  let currentPage = 0;
+  let potatoes = 0;
+
+  const counter = document.getElementById('page-counter');
+  pages.forEach((_, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'page-dot' + (i === 0 ? ' active' : '');
+    counter.appendChild(dot);
+  });
+
+  function goToPage(n) {
+    if (n < 0 || n >= pages.length) return;
+    pages[currentPage].className = 'page' + (n > currentPage ? ' prev' : '');
+    currentPage = n;
+    pages[currentPage].className = 'page active';
+    document.querySelectorAll('.page-dot').forEach((d, i) => {
+      d.className = 'page-dot' + (i === currentPage ? ' active' : '');
+    });
+    if (currentPage === 7) animateTimeline();
+  }
+  function nextPage() { goToPage(currentPage + 1); }
+  function prevPage() { goToPage(currentPage - 1); }
+
+  let touchStartX = 0;
+  document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+  document.addEventListener('touchend', e => {
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) { diff > 0 ? nextPage() : prevPage(); }
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') nextPage();
+    if (e.key === 'ArrowLeft') prevPage();
+  });
+
+  // Stars
+  function createStars(id, count = 80) {
+    const c = document.getElementById(id);
+    if (!c) return;
+    for (let i = 0; i < count; i++) {
+      const s = document.createElement('div');
+      s.className = 'star';
+      const size = Math.random() * 3 + 1;
+      s.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--duration:${Math.random()*3+2}s;animation-delay:${Math.random()*3}s;`;
+      c.appendChild(s);
+    }
+  }
+  createStars('cover-stars', 120);
+  createStars('science-stars-1', 60);
+  createStars('science-stars-2', 60);
+  createStars('end-stars', 100);
+
+  // Potato System
+  function addPotato(n = 1) {
+    potatoes += n;
+    document.getElementById('potato-count').textContent = potatoes;
+    try { localStorage.setItem('mars-potatoes', (parseInt(localStorage.getItem('mars-potatoes') || '0') + n)); } catch(e) {}
+  }
+  try {
+    const saved = localStorage.getItem('mars-potatoes');
+    if (saved) { potatoes = parseInt(saved); document.getElementById('potato-count').textContent = potatoes; }
+  } catch(e) {}
+
+  // Analogy Toggle
+  function toggleAnalogy(id) {
+    const box = document.getElementById(id);
+    box.classList.toggle('show');
+    const btn = box.previousElementSibling;
+    if (id === 'analogy-cal') {
+      btn.textContent = box.classList.contains('show') ? '📖 收起' : '🤔 什么是卡路里？点这里';
+    } else {
+      btn.textContent = box.classList.contains('show') ? '📖 收起' : '🤔 土豆怎么繁殖？点这里';
+    }
+  }
+
+  // === Calorie Game ===
+  let totalCal = 0;
+  let calorieDone = false;
+  function addFood(el, cal) {
+    if (calorieDone) return;
+    totalCal += cal;
+    el.classList.add('selected');
+    setTimeout(() => el.classList.remove('selected'), 300);
+
+    const pct = Math.min((totalCal / 2000) * 100, 100);
+    const fill = document.getElementById('calorie-fill');
+    fill.style.width = pct + '%';
+    document.getElementById('calorie-text').textContent = totalCal;
+    document.getElementById('cal-count').textContent = totalCal;
+
+    if (totalCal < 1000) { fill.className = 'calorie-fill low'; }
+    else if (totalCal < 1800) { fill.className = 'calorie-fill mid'; }
+    else if (totalCal <= 2200) { fill.className = 'calorie-fill good'; }
+    else { fill.className = 'calorie-fill over'; }
+
+    const result = document.getElementById('calorie-result');
+    if (totalCal >= 1800 && totalCal <= 2200) {
+      result.innerHTML = '🎉 <b>完美！</b>马克今天有够用的能量了！(' + totalCal + ' 卡路里)';
+      calorieDone = true;
+      addPotato(1);
+    } else if (totalCal > 2200) {
+      result.innerHTML = '😄 吃太多了！' + totalCal + ' 卡路里，超标啦～ 点"重新来"试试';
+    } else {
+      result.innerHTML = '还需要 ' + (2000 - totalCal) + ' 卡路里...继续加食物！';
+    }
+  }
+  function resetCalories() {
+    totalCal = 0; calorieDone = false;
+    document.getElementById('calorie-fill').style.width = '0%';
+    document.getElementById('calorie-fill').className = 'calorie-fill low';
+    document.getElementById('calorie-text').textContent = '0';
+    document.getElementById('cal-count').textContent = '0';
+    document.getElementById('calorie-result').innerHTML = '';
+  }
+
+  // === Division Game ===
+  const foodGrid = document.getElementById('food-grid');
+  for (let i = 0; i < 300; i++) {
+    const p = document.createElement('div');
+    p.className = 'food-packet';
+    p.id = 'packet-' + i;
+    foodGrid.appendChild(p);
+  }
+
+  let dayCount = 0;
+  let foodRemaining = 300;
+  let divisionDone = false;
+
+  function eatOneDay() {
+    if (foodRemaining <= 0 || divisionDone) return;
+    dayCount++;
+    const start = 300 - foodRemaining;
+    for (let i = start; i < start + 3 && i < 300; i++) {
+      document.getElementById('packet-' + i).classList.add('eaten');
+    }
+    foodRemaining -= 3;
+    document.getElementById('day-count').textContent = dayCount;
+    document.getElementById('food-left').textContent = foodRemaining;
+
+    if (foodRemaining <= 0) {
+      document.getElementById('day-btn').disabled = true;
+      document.getElementById('division-result').innerHTML = '📦 食物吃完了！一共吃了 <b>' + dayCount + ' 天</b>！';
+    }
+  }
+
+  function checkDivision() {
+    if (divisionDone) return;
+    const val = parseInt(document.getElementById('division-answer').value);
+    const result = document.getElementById('division-result');
+    if (val === 100) {
+      divisionDone = true;
+      result.innerHTML = '🎉 <b>答对了！</b>300 ÷ 3 = <b>100 天</b>！<br>但是 100 天够吗？往后看看……';
+      result.style.color = 'var(--accent-green)';
+      addPotato(1);
+    } else {
+      result.innerHTML = '💡 再想想：300 里面有几个 3？<br>可以点"过一天"慢慢数，或者用除法试试 🤔';
+      result.style.color = 'var(--accent-yellow)';
+    }
+  }
+
+  // === Timeline ===
+  let timelineAnimated = false;
+  function animateTimeline() {
+    if (timelineAnimated) return;
+    timelineAnimated = true;
+    setTimeout(() => {
+      document.getElementById('timeline-food').style.width = '25%'; // 100/400 = 25%
+    }, 300);
+  }
+
+  let gapDone = false;
+  function checkGap() {
+    if (gapDone) return;
+    const val = parseInt(document.getElementById('gap-answer').value);
+    const result = document.getElementById('gap-result');
+    if (val === 300) {
+      gapDone = true;
+      result.innerHTML = '🎉 <b>对了！</b>400 - 100 = <b>300 天</b>！<br>还缺 300 天的食物😱 马克必须自己想办法！';
+      result.style.color = 'var(--accent-green)';
+      addPotato(1);
+    } else {
+      result.innerHTML = '💡 食物够 100 天，飞船要 400 天才来……中间差多少？';
+      result.style.color = 'var(--accent-yellow)';
+    }
+  }
+</script>
+
+</body>
+</html>
