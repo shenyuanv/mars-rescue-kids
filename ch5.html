@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>火星种土豆 · 第五章：长途旅行</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Ma+Shan+Zheng&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--text-primary:#f5f0e8;--accent-warm:#ff6b35;--accent-blue:#4ecdc4;--accent-yellow:#ffe66d;--accent-green:#2ecc71;--science-bg:rgba(30,60,114,0.95);--analogy-bg:rgba(255,107,53,0.95)}
+  html,body{width:100%;height:100%;overflow:hidden;font-family:'ZCOOL KuaiLe','Ma Shan Zheng',sans-serif;background:#1a0a0a;touch-action:pan-y;-webkit-user-select:none;user-select:none}
+  .book{width:100%;height:100%;position:relative;overflow:hidden}
+  .page{position:absolute;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transform:translateX(100%);transition:all 0.6s cubic-bezier(0.25,0.46,0.45,0.94);pointer-events:none;overflow:hidden}
+  .page.active{opacity:1;transform:translateX(0);pointer-events:all}.page.prev{opacity:0;transform:translateX(-100%)}
+  .page-illustration{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:0}
+  .cover{background:linear-gradient(135deg,#1a0a0a,#4a2a1a,#8B3A2A)}.cover-title{font-size:clamp(2.5rem,8vw,5rem);color:var(--accent-yellow);text-shadow:3px 3px 0 rgba(0,0,0,0.3);z-index:2;text-align:center;line-height:1.3}
+  .cover-subtitle{font-size:clamp(1rem,3vw,1.8rem);color:var(--text-primary);opacity:0.8;margin-top:1rem;z-index:2}
+  .cover-chapter{font-size:clamp(1.2rem,3.5vw,2rem);color:var(--accent-warm);margin-top:2rem;z-index:2}
+  .cover-tap{position:absolute;bottom:8%;font-size:clamp(0.9rem,2.5vw,1.2rem);color:var(--text-primary);opacity:0.5;animation:pulse 2s infinite;z-index:2}
+  @keyframes pulse{0%,100%{opacity:0.3}50%{opacity:0.7}}
+  .stars{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1}.star{position:absolute;background:white;border-radius:50%;animation:twinkle var(--duration) infinite}
+  @keyframes twinkle{0%,100%{opacity:0.2}50%{opacity:1}}
+  .text-bubble{position:relative;z-index:10;background:rgba(0,0,0,0.7);color:var(--text-primary);padding:clamp(1rem,3vw,2rem) clamp(1.5rem,4vw,2.5rem);border-radius:24px;max-width:80%;font-size:clamp(1.1rem,3vw,1.6rem);line-height:1.8;box-shadow:0 8px 32px rgba(0,0,0,0.3);border:2px solid var(--accent-yellow)}
+  .text-bubble.mark{background:rgba(255,107,53,0.15);border-color:var(--accent-warm)}
+  .highlight{color:var(--accent-warm);font-weight:bold}.hl-blue{color:var(--accent-blue);font-weight:bold}
+  .science-panel{position:relative;z-index:10;width:85%;max-width:900px}
+  .science-main{background:var(--science-bg);color:var(--text-primary);padding:clamp(1.2rem,3vw,2rem) clamp(1.5rem,4vw,2.5rem);border-radius:20px;font-size:clamp(1rem,2.5vw,1.4rem);line-height:2;border:3px solid var(--accent-blue)}
+  .science-main h3{color:var(--accent-yellow);font-size:clamp(1.3rem,3.5vw,1.8rem);margin-bottom:0.8rem}.term{color:var(--accent-blue);font-weight:bold}
+  .analogy-btn{display:inline-block;margin-top:1rem;padding:0.6rem 1.5rem;background:var(--accent-warm);color:white;border:none;border-radius:30px;font-family:inherit;font-size:clamp(0.9rem,2.5vw,1.2rem);cursor:pointer}
+  .analogy-box{margin-top:1rem;background:var(--analogy-bg);color:white;padding:clamp(1rem,2.5vw,1.5rem);border-radius:16px;font-size:clamp(1rem,2.5vw,1.3rem);line-height:1.8;display:none;border:2px dashed var(--accent-yellow)}
+  .analogy-box.show{display:block;animation:slideDown 0.4s ease}
+  @keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+  .interactive-panel{position:relative;z-index:10;width:85%;max-width:800px;background:rgba(0,0,0,0.5);border-radius:20px;padding:clamp(1rem,3vw,2rem);border:3px solid var(--accent-blue)}
+  .interactive-panel h3{color:var(--accent-yellow);font-size:clamp(1.2rem,3vw,1.6rem);margin-bottom:1rem}
+  .question{font-size:clamp(1.1rem,2.8vw,1.5rem);color:var(--text-primary);line-height:1.8;margin-bottom:1rem}
+
+  /* Height Compare */
+  .height-compare{display:flex;align-items:flex-end;justify-content:center;gap:2rem;margin:1rem 0;height:30vh}
+  .mountain{display:flex;flex-direction:column;align-items:center;position:relative}
+  .mountain-bar{width:clamp(3rem,8vw,5rem);border-radius:8px 8px 0 0;transition:height 1.5s ease;display:flex;align-items:flex-start;justify-content:center;padding-top:0.3rem;font-size:clamp(0.7rem,1.8vw,1rem);color:white;font-weight:bold}
+  .mountain-label{font-size:clamp(0.8rem,2vw,1rem);color:var(--text-primary);margin-top:0.5rem;text-align:center}
+
+  /* Battery Game */
+  .battery-game{text-align:center}
+  .road-track{display:flex;align-items:center;justify-content:center;gap:0;margin:1rem 0;flex-wrap:wrap}
+  .road-segment{width:clamp(2.5rem,6vw,4rem);height:clamp(2.5rem,6vw,4rem);border:2px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:clamp(1.2rem,3vw,1.8rem);transition:all 0.3s;cursor:pointer}
+  .road-segment.driven{background:rgba(78,205,196,0.2);border-color:var(--accent-blue)}
+  .road-segment.current{border-color:var(--accent-yellow);background:rgba(255,230,109,0.15);animation:pulse 1s infinite}
+  .road-segment.charge{background:rgba(241,196,15,0.2);border-color:#f1c40f}
+  .battery-bar{width:80%;max-width:400px;height:30px;background:rgba(255,255,255,0.1);border-radius:15px;overflow:hidden;margin:0.5rem auto;position:relative}
+  .battery-fill{height:100%;border-radius:15px;transition:width 0.5s;display:flex;align-items:center;justify-content:center;font-size:0.8rem;color:white;font-weight:bold}
+  .battery-fill.full{background:linear-gradient(90deg,#2ecc71,#27ae60)}.battery-fill.half{background:linear-gradient(90deg,#f1c40f,#e67e22)}.battery-fill.low{background:linear-gradient(90deg,#e74c3c,#c0392b)}
+
+  /* Route Choice */
+  .route-cards{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin:1rem 0}
+  .route-card{flex:1;min-width:140px;max-width:250px;padding:1rem;border-radius:16px;border:3px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);cursor:pointer;transition:all 0.3s;text-align:center}
+  .route-card:active{transform:scale(0.97)}
+  .route-card.selected{border-color:var(--accent-green);background:rgba(46,204,113,0.15)}
+  .route-card .route-name{font-size:clamp(1.2rem,3vw,1.5rem);color:var(--accent-yellow);margin-bottom:0.5rem}
+  .route-card .route-detail{font-size:clamp(0.9rem,2.2vw,1.1rem);color:var(--text-primary);line-height:1.6}
+  .answer-row{display:flex;align-items:center;justify-content:center;gap:0.8rem;margin-top:1rem;flex-wrap:wrap}
+  .answer-label{font-size:clamp(1rem,2.5vw,1.3rem);color:var(--text-primary)}
+  .answer-input{width:5rem;padding:0.5rem;border-radius:12px;border:2px solid var(--accent-blue);background:rgba(255,255,255,0.1);color:var(--text-primary);font-family:inherit;font-size:clamp(1.2rem,3vw,1.5rem);text-align:center}
+  .answer-btn{padding:0.5rem 1.2rem;background:var(--accent-green);color:white;border:none;border-radius:12px;font-family:inherit;font-size:clamp(1rem,2.5vw,1.2rem);cursor:pointer}
+  .answer-result{font-size:clamp(1rem,2.5vw,1.3rem);color:var(--accent-yellow);text-align:center;margin-top:0.5rem;min-height:2em}
+
+  .nav-area{position:absolute;top:0;width:25%;height:100%;z-index:50;cursor:pointer}.nav-area.left{left:0}.nav-area.right{right:0}
+  .nav-hint{position:absolute;top:50%;transform:translateY(-50%);font-size:2.5rem;color:white;opacity:0;transition:opacity 0.3s;pointer-events:none}
+  .nav-area:hover .nav-hint{opacity:0.5}.nav-area.left .nav-hint{left:1rem}.nav-area.right .nav-hint{right:1rem}
+  .page-counter{position:fixed;bottom:1.5%;left:50%;transform:translateX(-50%);z-index:100;display:flex;gap:8px}
+  .page-dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.3);transition:all 0.3s}.page-dot.active{background:var(--accent-yellow);transform:scale(1.3)}
+  .potato-counter{position:fixed;top:1.5%;right:1.5%;z-index:200;background:rgba(0,0,0,0.6);padding:0.4rem 0.8rem;border-radius:20px;font-size:clamp(0.9rem,2.5vw,1.2rem);color:var(--accent-yellow);border:2px solid rgba(255,230,109,0.3)}
+  .content-bottom{position:absolute;bottom:8%;width:100%;display:flex;flex-direction:column;align-items:center;z-index:10}
+  .content-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:100%;display:flex;flex-direction:column;align-items:center;z-index:10}
+  .ch-link{display:inline-block;margin-top:0.5rem;padding:0.8rem 2rem;background:var(--accent-warm);color:#fff;border-radius:30px;text-decoration:none;font-size:1.1em}
+  .ch-link-back{display:inline-block;margin-top:0.3rem;padding:0.5rem 1.2rem;background:rgba(255,255,255,0.15);color:var(--text-primary);border-radius:20px;text-decoration:none;font-size:0.9em}
+  .mars-surface{position:absolute;bottom:0;left:0;width:100%;height:30%;background:linear-gradient(to top,#8B3A2A 0%,#a0522d 40%,transparent 100%);z-index:1}
+  @media(orientation:portrait){.text-bubble{max-width:90%}.science-panel,.interactive-panel{width:92%}}
+</style>
+</head>
+<body>
+<div class="book" id="book">
+
+  <div class="page cover active" data-page="0">
+    <div class="stars" id="cover-stars"></div>
+    <div class="cover-title">🥔 火星种土豆</div>
+    <div class="cover-subtitle">第五章</div>
+    <div class="cover-chapter">长途旅行 🚗</div>
+    <div class="cover-tap">👆 点击右边翻页</div>
+  </div>
+
+  <!-- Page 1: The Mission -->
+  <div class="page" data-page="1" style="background:linear-gradient(180deg,#1a0a0a 0%,#4a2a1a 50%,#8B3A2A 100%);">
+    <img class="page-illustration" src="images/ch5-rover.png" alt="" onerror="this.style.display='none'">
+    <div class="content-bottom">
+      <div class="text-bubble mark">
+        地球收到了马克的消息！🎉<br><br>
+        NASA 的科学家们告诉他：<br>
+        <span style="font-family:monospace;color:var(--accent-blue);">
+        "在160公里外有一艘旧飞行器，<br>
+        　里面有更好的通讯设备！"
+        </span><br><br>
+        马克必须<span class="highlight">开火星车</span>去那里。<br>
+        问题是——路很远，电池有限 🔋
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 2: Science — Mars Landscape -->
+  <div class="page" data-page="2" style="background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);">
+    <div class="stars" id="sci-stars-1"></div>
+    <div class="content-center">
+      <div class="science-panel">
+        <div class="science-main">
+          <h3>🔬 科学时间：火星长什么样？</h3>
+          <p>火星上有太阳系里<span class="term">最高的山</span>和<span class="term">最大的峡谷</span>！</p>
+          <p>
+            🏔️ <span class="term">奥林匹斯山</span>：高 21 公里<br>
+            <span style="font-size:0.9em">（珠穆朗玛峰才 8.8 公里，它是珠峰的 2 倍多！）</span>
+          </p>
+          <p>
+            🏜️ <span class="term">水手号峡谷</span>：长 4000 公里<br>
+            <span style="font-size:0.9em">（能从北京延伸到印度 🤯）</span>
+          </p>
+          <p>火星表面是<span class="term">红色</span>的——因为土里有很多<span class="term">铁锈</span>（氧化铁）🟤</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 3: Height Compare Interactive -->
+  <div class="page" data-page="3" style="background:linear-gradient(180deg,#0d1b2a 0%,#1b2838 100%);">
+    <div class="content-center">
+      <div class="interactive-panel" style="border-color:var(--accent-yellow);">
+        <h3>🏔️ 有多高？比一比！</h3>
+        <div class="question">点"显示"看看奥林匹斯山和珠峰的对比</div>
+        <div class="height-compare" id="height-compare">
+          <div class="mountain">
+            <div class="mountain-bar" id="bar-everest" style="height:0;background:linear-gradient(to top,#666,#aaa);width:clamp(3rem,8vw,5rem);">8.8km</div>
+            <div class="mountain-label">🏔️ 珠穆朗玛峰<br>8.8 公里</div>
+          </div>
+          <div class="mountain">
+            <div class="mountain-bar" id="bar-olympus" style="height:0;background:linear-gradient(to top,#8B3A2A,#c0392b);width:clamp(3rem,8vw,5rem);">21km</div>
+            <div class="mountain-label">🌋 奥林匹斯山<br>21 公里</div>
+          </div>
+        </div>
+        <button class="analogy-btn" id="height-btn" onclick="showHeight()" style="display:block;margin:0 auto;">📏 显示高度对比</button>
+        <div class="answer-result" id="height-result"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 4: Science — Solar Energy -->
+  <div class="page" data-page="4" style="background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);">
+    <div class="stars" id="sci-stars-2"></div>
+    <img class="page-illustration" src="images/ch5-solar.png" alt="" style="opacity:0.2;" onerror="this.style.display='none'">
+    <div class="content-center">
+      <div class="science-panel">
+        <div class="science-main">
+          <h3>🔬 科学时间：太阳能 ☀️→🔋</h3>
+          <p>火星车用<span class="term">太阳能</span>充电：</p>
+          <p>太阳光照到<span class="term">太阳能板</span> → 变成<span class="term">电</span> → 驱动火星车</p>
+          <p>和家里屋顶的太阳能板一样的原理！</p>
+          <button class="analogy-btn" onclick="toggleAnalogy('a-solar')">🤔 为什么火星充电更慢？</button>
+          <div class="analogy-box" id="a-solar">
+            ☀️ 太阳的光像手电筒——离得越远越暗<br><br>
+            🌍 地球离太阳 1.5 亿公里<br>
+            🔴 火星离太阳 2.3 亿公里——<b>远了一半多</b>！<br><br>
+            所以火星收到的阳光只有地球的<b>一半不到</b><br>
+            太阳能板充电速度就慢了<b>一倍</b> ⏰<br><br>
+            想象你在离台灯很远的地方看书📖<br>
+            灯光变暗了，看起来更费劲——一样的道理！
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 5: Battery Calculation -->
+  <div class="page" data-page="5" style="background:linear-gradient(180deg,#0d1b2a 0%,#1b2838 100%);">
+    <div class="content-center">
+      <div class="interactive-panel">
+        <h3>🔋 充几次电？</h3>
+        <div class="question">
+          火星车满电能跑 <span class="highlight">80 公里</span><br>
+          目的地在 <span class="hl-blue">160 公里</span> 外
+        </div>
+        <div class="battery-game">
+          <div class="road-track" id="road-track"></div>
+          <div class="battery-bar"><div class="battery-fill full" id="battery-fill" style="width:100%">100%</div></div>
+          <div style="margin-top:0.5rem;font-size:clamp(0.9rem,2.2vw,1.1rem);color:var(--text-primary)">已走：<span id="km-driven">0</span> / 160 公里</div>
+        </div>
+        <div class="answer-row">
+          <span class="answer-label">160 ÷ 80 = 需要充</span>
+          <input class="answer-input" id="charge-answer" type="number" placeholder="?" inputmode="numeric">
+          <span class="answer-label">次电</span>
+          <button class="answer-btn" onclick="checkCharge()">✓</button>
+        </div>
+        <div class="answer-result" id="charge-result"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 6: Route Choice -->
+  <div class="page" data-page="6" style="background:linear-gradient(180deg,#2d1b1b 0%,#4a2a1a 50%,#1a0a0a 100%);">
+    <div class="content-center">
+      <div class="interactive-panel" style="border-color:var(--accent-warm);">
+        <h3>🗺️ 选路线！</h3>
+        <div class="question">有两条路，哪条更近？</div>
+        <div class="route-cards">
+          <div class="route-card" id="route-a" onclick="pickRoute('a')">
+            <div class="route-name">路线 A</div>
+            <div class="route-detail">🛣️ 160 公里<br>平路，好开</div>
+          </div>
+          <div class="route-card" id="route-b" onclick="pickRoute('b')">
+            <div class="route-name">路线 B</div>
+            <div class="route-detail">🛣️ 120 公里<br>但要绕大坑 +30 公里</div>
+          </div>
+        </div>
+        <div class="answer-row">
+          <span class="answer-label">路线B实际：120 + 30 =</span>
+          <input class="answer-input" id="route-answer" type="number" placeholder="?" inputmode="numeric">
+          <button class="answer-btn" onclick="checkRoute()">✓</button>
+        </div>
+        <div class="answer-result" id="route-result"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 7: End -->
+  <div class="page" data-page="7" style="background:linear-gradient(180deg,#000 0%,#1a0a2e 50%,#2d1b69 100%);">
+    <div class="stars" id="end-stars"></div>
+    <div class="content-center">
+      <div class="text-bubble" style="text-align:center;">
+        马克成功到达了旧飞行器！🎉🚗<br><br>
+        他拿到了通讯设备，<br>
+        现在可以和地球<span class="hl-blue">随时联系</span>了！📡<br><br>
+        NASA开始制定<span class="highlight">救援计划</span>——<br>
+        派飞船来接马克回家！🏠<br><br>
+        <span style="font-size:1.3em;">下一章：回家 🚀</span><br>
+        <span style="font-size:0.9em;opacity:0.6;">最难的一步——飞上太空和飞船对接！</span><br><br>
+        <a class="ch-link" href="ch6.html">下一章 →</a><br>
+        <a class="ch-link-back" href="ch4.html">← 上一章</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="potato-counter" id="potato-counter">🥔 × <span id="potato-count">0</span></div>
+<div class="nav-area left" onclick="prevPage()"><div class="nav-hint">‹</div></div>
+<div class="nav-area right" onclick="nextPage()"><div class="nav-hint">›</div></div>
+<div class="page-counter" id="page-counter"></div>
+
+<script>
+  const pages=document.querySelectorAll('.page');let currentPage=0,potatoes=0;
+  const ctr=document.getElementById('page-counter');
+  pages.forEach((_,i)=>{const d=document.createElement('div');d.className='page-dot'+(i===0?' active':'');ctr.appendChild(d);});
+  function goToPage(n){if(n<0||n>=pages.length)return;pages[currentPage].className='page'+(n>currentPage?' prev':'');currentPage=n;pages[currentPage].className='page active';document.querySelectorAll('.page-dot').forEach((d,i)=>{d.className='page-dot'+(i===currentPage?' active':'')});if(currentPage===3)animateHeight();}
+  function nextPage(){goToPage(currentPage+1)}function prevPage(){goToPage(currentPage-1)}
+  let tx=0;document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX});document.addEventListener('touchend',e=>{const d=tx-e.changedTouches[0].clientX;if(Math.abs(d)>50){d>0?nextPage():prevPage()}});
+  document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' ')nextPage();if(e.key==='ArrowLeft')prevPage()});
+  function createStars(id,c=80){const el=document.getElementById(id);if(!el)return;for(let i=0;i<c;i++){const s=document.createElement('div');s.className='star';const sz=Math.random()*3+1;s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--duration:${Math.random()*3+2}s;animation-delay:${Math.random()*3}s;`;el.appendChild(s);}}
+  createStars('cover-stars',120);createStars('sci-stars-1',60);createStars('sci-stars-2',60);createStars('end-stars',100);
+  function addPotato(n=1){potatoes+=n;document.getElementById('potato-count').textContent=potatoes;try{localStorage.setItem('mars-potatoes',(parseInt(localStorage.getItem('mars-potatoes')||'0')+n))}catch(e){}}
+  try{const s=localStorage.getItem('mars-potatoes');if(s){potatoes=parseInt(s);document.getElementById('potato-count').textContent=potatoes;}}catch(e){}
+  function toggleAnalogy(id){document.getElementById(id).classList.toggle('show')}
+
+  // Height Compare
+  let heightShown=false;
+  function showHeight(){
+    if(heightShown)return;heightShown=true;
+    document.getElementById('bar-everest').style.height='35%';
+    document.getElementById('bar-olympus').style.height='84%';
+    document.getElementById('height-btn').textContent='😮 差这么多！';
+    document.getElementById('height-result').innerHTML='奥林匹斯山是珠峰的 <b>2.4 倍</b>！如果珠峰站在旁边，只到它腰的位置！';
+  }
+  function animateHeight(){if(!heightShown)showHeight();}
+
+  // Road/Battery
+  const roadTrack=document.getElementById('road-track');
+  const segments=8; // each = 20km
+  for(let i=0;i<segments;i++){const s=document.createElement('div');s.className='road-segment'+(i===0?' current':'');s.textContent=i===0?'🚗':((i+1)*20);s.dataset.idx=i;s.onclick=function(){driveSegment(i)};roadTrack.appendChild(s);}
+  let driven=0,battery=100;
+  function driveSegment(idx){
+    if(idx!==driven)return;if(battery<=0){chargeBattery();return;}
+    const seg=roadTrack.children[idx];seg.classList.add('driven');seg.classList.remove('current');seg.textContent='✓';
+    driven++;battery-=12.5;
+    const fill=document.getElementById('battery-fill');fill.style.width=Math.max(battery,0)+'%';fill.textContent=Math.round(battery)+'%';
+    if(battery>50)fill.className='battery-fill full';else if(battery>20)fill.className='battery-fill half';else fill.className='battery-fill low';
+    document.getElementById('km-driven').textContent=driven*20;
+    if(driven<segments){roadTrack.children[driven].classList.add('current');roadTrack.children[driven].textContent='🚗';}
+    if(battery<=0&&driven<segments){
+      const chargeBtn=document.createElement('div');chargeBtn.className='road-segment charge';chargeBtn.textContent='⚡';chargeBtn.style.cursor='pointer';chargeBtn.onclick=chargeBattery;
+      roadTrack.children[driven].classList.remove('current');roadTrack.children[driven].before(chargeBtn);
+    }
+    if(driven>=segments)document.getElementById('charge-result').innerHTML='🚗 到达目的地！';
+  }
+  function chargeBattery(){battery=100;document.getElementById('battery-fill').style.width='100%';document.getElementById('battery-fill').textContent='100%';document.getElementById('battery-fill').className='battery-fill full';if(driven<segments){roadTrack.children[driven].classList.add('current');roadTrack.children[driven].textContent='🚗';}}
+  let chargeDone=false;
+  function checkCharge(){if(chargeDone)return;const v=parseInt(document.getElementById('charge-answer').value);const r=document.getElementById('charge-result');
+    if(v===2){chargeDone=true;r.innerHTML='🎉 <b>对了！</b>160 ÷ 80 = <b>2 次</b>！至少中途充一次电⚡';r.style.color='var(--accent-green)';addPotato(1);}
+    else{r.innerHTML='💡 满电跑80公里，要跑160公里……80+80=160 🤔';}}
+
+  // Route
+  let routeDone=false;
+  function pickRoute(r){document.getElementById('route-a').classList.toggle('selected',r==='a');document.getElementById('route-b').classList.toggle('selected',r==='b');}
+  function checkRoute(){if(routeDone)return;const v=parseInt(document.getElementById('route-answer').value);const r=document.getElementById('route-result');
+    if(v===150){routeDone=true;r.innerHTML='🎉 <b>对了！</b>120 + 30 = <b>150 公里</b>！路线B更近（比A少10公里）👍';r.style.color='var(--accent-green)';addPotato(1);document.getElementById('route-b').classList.add('selected');}
+    else{r.innerHTML='💡 路线B原本120公里，加上绕大坑的30公里……';}}
+</script>
+</body>
+</html>

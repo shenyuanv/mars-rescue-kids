@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>火星种土豆 · 第三章：火星农场</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Ma+Shan+Zheng&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --page-bg: #1a0a0a; --text-primary: #f5f0e8; --text-dark: #2d2d2d;
+    --accent-warm: #ff6b35; --accent-blue: #4ecdc4; --accent-yellow: #ffe66d;
+    --accent-green: #2ecc71; --science-bg: rgba(30, 60, 114, 0.95);
+    --analogy-bg: rgba(255, 107, 53, 0.95); --quiz-bg: rgba(20, 80, 60, 0.95);
+  }
+  html, body { width:100%; height:100%; overflow:hidden; font-family:'ZCOOL KuaiLe','Ma Shan Zheng',sans-serif; background:var(--page-bg); touch-action:pan-y; -webkit-user-select:none; user-select:none; }
+  .book { width:100%; height:100%; position:relative; overflow:hidden; }
+  .page { position:absolute; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0; transform:translateX(100%); transition:all 0.6s cubic-bezier(0.25,0.46,0.45,0.94); pointer-events:none; overflow:hidden; }
+  .page.active { opacity:1; transform:translateX(0); pointer-events:all; }
+  .page.prev { opacity:0; transform:translateX(-100%); }
+  .page-illustration { position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:0; }
+  .cover { background:linear-gradient(135deg,#0a1a0a,#1a3a1a,#2d4b2d); }
+  .cover-title { font-size:clamp(2.5rem,8vw,5rem); color:var(--accent-yellow); text-shadow:3px 3px 0 rgba(0,0,0,0.3); z-index:2; text-align:center; line-height:1.3; }
+  .cover-subtitle { font-size:clamp(1rem,3vw,1.8rem); color:var(--text-primary); opacity:0.8; margin-top:1rem; z-index:2; }
+  .cover-chapter { font-size:clamp(1.2rem,3.5vw,2rem); color:var(--accent-green); margin-top:2rem; z-index:2; }
+  .cover-tap { position:absolute; bottom:8%; font-size:clamp(0.9rem,2.5vw,1.2rem); color:var(--text-primary); opacity:0.5; animation:pulse 2s infinite; z-index:2; }
+  @keyframes pulse { 0%,100% { opacity:0.3; } 50% { opacity:0.7; } }
+  .stars { position:absolute; top:0; left:0; width:100%; height:100%; z-index:1; }
+  .star { position:absolute; background:white; border-radius:50%; animation:twinkle var(--duration) infinite; }
+  @keyframes twinkle { 0%,100% { opacity:0.2; } 50% { opacity:1; } }
+  .text-bubble { position:relative; z-index:10; background:rgba(0,0,0,0.7); color:var(--text-primary); padding:clamp(1rem,3vw,2rem) clamp(1.5rem,4vw,2.5rem); border-radius:24px; max-width:80%; font-size:clamp(1.1rem,3vw,1.6rem); line-height:1.8; box-shadow:0 8px 32px rgba(0,0,0,0.3); border:2px solid var(--accent-yellow); }
+  .text-bubble.mark { background:rgba(255,107,53,0.15); border-color:var(--accent-warm); }
+  .text-bubble .highlight { color:var(--accent-warm); font-weight:bold; }
+  .text-bubble .hl-blue { color:var(--accent-blue); font-weight:bold; }
+  .text-bubble .hl-green { color:var(--accent-green); font-weight:bold; }
+  .science-panel { position:relative; z-index:10; width:85%; max-width:900px; }
+  .science-main { background:var(--science-bg); color:var(--text-primary); padding:clamp(1.2rem,3vw,2rem) clamp(1.5rem,4vw,2.5rem); border-radius:20px; font-size:clamp(1rem,2.5vw,1.4rem); line-height:2; border:3px solid var(--accent-blue); box-shadow:0 8px 32px rgba(0,0,0,0.3); }
+  .science-main h3 { color:var(--accent-yellow); font-size:clamp(1.3rem,3.5vw,1.8rem); margin-bottom:0.8rem; }
+  .science-main .term { color:var(--accent-blue); font-weight:bold; }
+  .analogy-btn { display:inline-block; margin-top:1rem; padding:0.6rem 1.5rem; background:var(--accent-warm); color:white; border:none; border-radius:30px; font-family:inherit; font-size:clamp(0.9rem,2.5vw,1.2rem); cursor:pointer; }
+  .analogy-btn:active { transform:scale(0.95); }
+  .analogy-box { margin-top:1rem; background:var(--analogy-bg); color:white; padding:clamp(1rem,2.5vw,1.5rem); border-radius:16px; font-size:clamp(1rem,2.5vw,1.3rem); line-height:1.8; display:none; border:2px dashed var(--accent-yellow); }
+  .analogy-box.show { display:block; animation:slideDown 0.4s ease; }
+  @keyframes slideDown { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+
+  /* Interactive Panel */
+  .interactive-panel { position:relative; z-index:10; width:85%; max-width:800px; background:rgba(0,0,0,0.5); border-radius:20px; padding:clamp(1rem,3vw,2rem); border:3px solid var(--accent-blue); }
+  .interactive-panel h3 { color:var(--accent-yellow); font-size:clamp(1.2rem,3vw,1.6rem); margin-bottom:1rem; }
+  .interactive-panel .question { font-size:clamp(1.1rem,2.8vw,1.5rem); color:var(--text-primary); line-height:1.8; margin-bottom:1rem; }
+
+  /* Four Elements Puzzle */
+  .elements-game { text-align:center; }
+  .elements-slots { display:flex; gap:0.8rem; justify-content:center; flex-wrap:wrap; margin:1rem 0; }
+  .element-slot {
+    width:clamp(4rem,12vw,6rem); height:clamp(4rem,12vw,6rem);
+    border:3px dashed rgba(255,255,255,0.3); border-radius:16px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    font-size:clamp(0.7rem,1.8vw,0.9rem); color:rgba(255,255,255,0.5);
+    transition:all 0.3s;
+  }
+  .element-slot.filled { border-color:var(--accent-green); border-style:solid; background:rgba(46,204,113,0.15); }
+  .element-slot .slot-emoji { font-size:clamp(1.5rem,4vw,2.5rem); display:none; }
+  .element-slot.filled .slot-emoji { display:block; }
+  .element-slot.filled .slot-label { color:var(--accent-green); }
+
+  .elements-choices { display:flex; gap:0.8rem; justify-content:center; flex-wrap:wrap; margin:1rem 0; }
+  .element-choice {
+    padding:0.6rem 1rem; border-radius:16px; cursor:pointer;
+    border:2px solid rgba(255,255,255,0.3); background:rgba(255,255,255,0.08);
+    color:var(--text-primary); font-family:inherit; font-size:clamp(1rem,2.5vw,1.3rem);
+    transition:all 0.3s; display:flex; align-items:center; gap:0.5rem;
+  }
+  .element-choice:active { transform:scale(0.95); }
+  .element-choice.used { opacity:0.3; pointer-events:none; }
+  .elements-result { font-size:clamp(1rem,2.5vw,1.3rem); color:var(--accent-yellow); text-align:center; margin-top:0.5rem; min-height:2em; }
+
+  /* Area Grid */
+  .area-grid-container { text-align:center; }
+  .area-grid {
+    display:inline-grid; gap:3px; margin:1rem auto;
+  }
+  .area-cell {
+    width:clamp(2rem,5vw,3rem); height:clamp(2rem,5vw,3rem);
+    border:2px solid rgba(255,255,255,0.2); border-radius:6px;
+    cursor:pointer; transition:all 0.2s; background:rgba(255,255,255,0.05);
+  }
+  .area-cell.filled { background:rgba(139,90,43,0.6); border-color:var(--accent-warm); }
+  .area-counter { font-size:clamp(1.1rem,2.8vw,1.4rem); color:var(--accent-yellow); margin-top:0.5rem; }
+
+  /* Potato Planting */
+  .potato-grid {
+    display:inline-grid; gap:3px; margin:1rem auto;
+  }
+  .potato-cell {
+    width:clamp(2.5rem,6vw,3.5rem); height:clamp(2.5rem,6vw,3.5rem);
+    border:2px solid rgba(255,255,255,0.15); border-radius:8px;
+    cursor:pointer; transition:all 0.2s; background:rgba(139,90,43,0.3);
+    display:flex; align-items:center; justify-content:center;
+    font-size:clamp(0.8rem,2vw,1.2rem);
+  }
+  .potato-cell.planted { background:rgba(46,204,113,0.2); border-color:var(--accent-green); }
+  .potato-counter-game { font-size:clamp(1.1rem,2.8vw,1.4rem); color:var(--accent-yellow); margin-top:0.5rem; }
+
+  /* Answer Row */
+  .answer-row { display:flex; align-items:center; justify-content:center; gap:0.8rem; margin-top:1rem; flex-wrap:wrap; }
+  .answer-label { font-size:clamp(1rem,2.5vw,1.3rem); color:var(--text-primary); }
+  .answer-input { width:5rem; padding:0.5rem; border-radius:12px; border:2px solid var(--accent-blue); background:rgba(255,255,255,0.1); color:var(--text-primary); font-family:inherit; font-size:clamp(1.2rem,3vw,1.5rem); text-align:center; }
+  .answer-btn { padding:0.5rem 1.2rem; background:var(--accent-green); color:white; border:none; border-radius:12px; font-family:inherit; font-size:clamp(1rem,2.5vw,1.2rem); cursor:pointer; }
+  .answer-btn:active { transform:scale(0.95); }
+  .answer-result { font-size:clamp(1rem,2.5vw,1.3rem); color:var(--accent-yellow); text-align:center; margin-top:0.5rem; min-height:2em; }
+
+  /* Quiz */
+  .quiz-options { display:flex; flex-direction:column; gap:0.8rem; margin-top:0.5rem; }
+  .quiz-option { padding:0.8rem 1.2rem; border-radius:16px; cursor:pointer; font-family:inherit; font-size:clamp(1rem,2.5vw,1.3rem); border:3px solid rgba(255,255,255,0.3); background:rgba(255,255,255,0.1); color:var(--text-primary); transition:all 0.3s; text-align:left; }
+  .quiz-option:active { transform:scale(0.97); }
+  .quiz-option.correct { background:rgba(46,204,113,0.3); border-color:#2ecc71; }
+  .quiz-option.wrong { background:rgba(231,76,60,0.3); border-color:#e74c3c; animation:shake 0.5s ease; }
+  .quiz-option.disabled { pointer-events:none; opacity:0.5; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+
+  .nav-area { position:absolute; top:0; width:25%; height:100%; z-index:50; cursor:pointer; }
+  .nav-area.left { left:0; } .nav-area.right { right:0; }
+  .nav-hint { position:absolute; top:50%; transform:translateY(-50%); font-size:2.5rem; color:white; opacity:0; transition:opacity 0.3s; pointer-events:none; }
+  .nav-area:hover .nav-hint { opacity:0.5; }
+  .nav-area.left .nav-hint { left:1rem; } .nav-area.right .nav-hint { right:1rem; }
+  .page-counter { position:fixed; bottom:1.5%; left:50%; transform:translateX(-50%); z-index:100; display:flex; gap:8px; }
+  .page-dot { width:10px; height:10px; border-radius:50%; background:rgba(255,255,255,0.3); transition:all 0.3s; }
+  .page-dot.active { background:var(--accent-yellow); transform:scale(1.3); }
+  .potato-counter { position:fixed; top:1.5%; right:1.5%; z-index:200; background:rgba(0,0,0,0.6); padding:0.4rem 0.8rem; border-radius:20px; font-size:clamp(0.9rem,2.5vw,1.2rem); color:var(--accent-yellow); border:2px solid rgba(255,230,109,0.3); }
+  .content-bottom { position:absolute; bottom:8%; width:100%; display:flex; flex-direction:column; align-items:center; z-index:10; }
+  .content-center { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:100%; display:flex; flex-direction:column; align-items:center; z-index:10; }
+  .ch-link { display:inline-block; margin-top:0.5rem; padding:0.8rem 2rem; background:var(--accent-warm); color:#fff; border-radius:30px; text-decoration:none; font-size:1.1em; }
+  .ch-link-back { display:inline-block; margin-top:0.3rem; padding:0.5rem 1.2rem; background:rgba(255,255,255,0.15); color:var(--text-primary); border-radius:20px; text-decoration:none; font-size:0.9em; }
+  @media (orientation:portrait) { .text-bubble{max-width:90%} .science-panel,.interactive-panel{width:92%} }
+</style>
+</head>
+<body>
+<div class="book" id="book">
+
+  <!-- Cover -->
+  <div class="page cover active" data-page="0">
+    <div class="stars" id="cover-stars"></div>
+    <div class="cover-title">🥔 火星种土豆</div>
+    <div class="cover-subtitle">第三章</div>
+    <div class="cover-chapter">火星农场 🌱</div>
+    <div class="cover-tap">👆 点击右边翻页</div>
+  </div>
+
+  <!-- Page 1: Decision -->
+  <div class="page" data-page="1" style="background:linear-gradient(180deg,#1a0a0a 0%,#2d3a1a 50%,#3d4a2a 100%);">
+    <img class="page-illustration" src="images/ch3-planting.png" alt="" onerror="this.style.display='none'">
+    <div class="content-bottom">
+      <div class="text-bubble mark">
+        "好！种土豆！" 马克撸起袖子。<br><br>
+        但是等等……种东西需要什么？<br><br>
+        在地球上，随便找块地挖个坑就行。<br>
+        可这是<span class="highlight">火星</span>啊！<br><br>
+        马克需要搞清楚三件事：<br>
+        1️⃣ 植物需要什么才能活？<br>
+        2️⃣ 火星的土能用吗？<br>
+        3️⃣ 需要多大的地？
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 2: Science — Photosynthesis -->
+  <div class="page" data-page="2" style="background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);">
+    <div class="stars" id="sci-stars-1"></div>
+    <img class="page-illustration" src="images/ch3-photosynthesis.png" alt="" style="opacity:0.2;" onerror="this.style.display='none'">
+    <div class="content-center">
+      <div class="science-panel">
+        <div class="science-main">
+          <h3>🔬 科学时间：植物需要什么？</h3>
+          <p>植物生长需要<span class="term">四样东西</span>：</p>
+          <p>
+            ☀️ <span class="term">阳光</span> — 植物的"食物工厂"<br>
+            💧 <span class="term">水</span> — 运送营养的"快递员"<br>
+            🌍 <span class="term">土壤</span> — 扎根 + 矿物质<br>
+            🌬️ <span class="term">二氧化碳</span> — 植物"吸进去"的气体
+          </p>
+          <p>
+            植物用阳光把水和二氧化碳变成<span class="term">糖</span>（自己的食物），<br>
+            同时放出<span class="term">氧气</span>——这叫<span class="term">光合作用</span>！
+          </p>
+          <button class="analogy-btn" onclick="toggleAnalogy('analogy-photo')">🤔 光合作用是什么？点这里</button>
+          <div class="analogy-box" id="analogy-photo">
+            <span class="emoji">🏭</span> 想象植物的叶子是一个小工厂：<br><br>
+            <b>原料：</b>阳光 ☀️ + 水 💧 + 二氧化碳 🌬️<br>
+            <b>产品：</b>糖 🍬（植物自己吃） + 氧气 💨（给我们呼吸）<br><br>
+            就像你用面粉+水+酵母做面包🍞——<br>
+            植物用阳光+水+CO₂做自己的"面包"！<br><br>
+            <b>有趣的是：</b>火星空气里96%都是CO₂——<br>
+            对植物来说，这简直是<b>自助餐</b>！🎉
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 3: Interactive — Four Elements -->
+  <div class="page" data-page="3" style="background:linear-gradient(180deg,#0d1b2a 0%,#1b2838 100%);">
+    <div class="content-center">
+      <div class="interactive-panel" style="border-color:var(--accent-green);">
+        <h3>🌱 植物四要素拼图！</h3>
+        <div class="question">把四样东西拖到正确的位置，让土豆苗发芽！</div>
+        <div class="elements-game">
+          <div class="elements-slots">
+            <div class="element-slot" id="slot-sun" data-need="sun"><span class="slot-emoji">☀️</span><span class="slot-label">阳光</span></div>
+            <div class="element-slot" id="slot-water" data-need="water"><span class="slot-emoji">💧</span><span class="slot-label">水</span></div>
+            <div class="element-slot" id="slot-soil" data-need="soil"><span class="slot-emoji">🌍</span><span class="slot-label">土壤</span></div>
+            <div class="element-slot" id="slot-co2" data-need="co2"><span class="slot-emoji">🌬️</span><span class="slot-label">CO₂</span></div>
+          </div>
+          <div class="elements-choices" id="elem-choices">
+            <div class="element-choice" onclick="placeElement(this,'co2')">🌬️ 二氧化碳</div>
+            <div class="element-choice" onclick="placeElement(this,'sun')">☀️ 阳光</div>
+            <div class="element-choice" onclick="placeElement(this,'soil')">🌍 土壤</div>
+            <div class="element-choice" onclick="placeElement(this,'water')">💧 水</div>
+          </div>
+          <div class="elements-result" id="elem-result"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 4: Mars Soil Quiz -->
+  <div class="page" data-page="4" style="background:linear-gradient(180deg,#2d1b1b 0%,#4a2a1a 50%,#3d1a1a 100%);">
+    <div class="content-center">
+      <div class="interactive-panel" style="border-color:var(--accent-warm);">
+        <h3>🧠 动脑时间</h3>
+        <div class="question">
+          火星的土叫<b>"风化层"</b>——有矿物质，但没有<b>微生物</b>。<br>
+          （地球土壤里的小生物帮植物吸收营养）<br><br>
+          马克怎么让火星的土变成能种东西的土？
+        </div>
+        <div class="quiz-options" id="quiz-soil">
+          <div class="quiz-option" onclick="checkSoil(this,false)">A. 加入火星石头 🪨</div>
+          <div class="quiz-option" onclick="checkSoil(this,true)">B. 混入人类粪便做肥料 💩</div>
+          <div class="quiz-option" onclick="checkSoil(this,false)">C. 什么都不用加 ✨</div>
+        </div>
+        <div class="answer-result" id="soil-result"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 5: Area Calculation -->
+  <div class="page" data-page="5" style="background:linear-gradient(180deg,#0d1b2a 0%,#1b2838 100%);">
+    <div class="content-center">
+      <div class="interactive-panel">
+        <h3>📐 算面积！</h3>
+        <div class="question">
+          马克找到一块空地，长 <span class="highlight">6 米</span>，宽 <span class="hl-blue">4 米</span><br>
+          👆 点击格子把地填满，数数一共几格？
+        </div>
+        <div class="area-grid-container">
+          <div class="area-grid" id="area-grid" style="grid-template-columns:repeat(6,1fr);"></div>
+          <div class="area-counter">已填：<span id="area-count">0</span> / 24 格</div>
+        </div>
+        <div class="answer-row">
+          <span class="answer-label">6 × 4 =</span>
+          <input class="answer-input" id="area-answer" type="number" placeholder="?" inputmode="numeric">
+          <button class="answer-btn" onclick="checkArea()">✓</button>
+        </div>
+        <div class="answer-result" id="area-result"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 6: Planting Potatoes -->
+  <div class="page" data-page="6" style="background:linear-gradient(180deg,#1a2a0a 0%,#2d3a1a 50%,#1a2a0a 100%);">
+    <div class="content-center">
+      <div class="interactive-panel" style="border-color:var(--accent-green);">
+        <h3>🥔 种土豆！</h3>
+        <div class="question">
+          每 <span class="highlight">1 平方米</span> 种 <span class="hl-blue">2 颗</span> 土豆<br>
+          马克有 <span class="highlight">24 平方米</span> 的地<br>
+          👆 点击每格种2颗土豆！
+        </div>
+        <div class="area-grid-container">
+          <div class="potato-grid" id="potato-grid" style="grid-template-columns:repeat(6,1fr);"></div>
+          <div class="potato-counter-game">已种：<span id="plant-count">0</span> 颗</div>
+        </div>
+        <div class="answer-row">
+          <span class="answer-label">24 × 2 =</span>
+          <input class="answer-input" id="plant-answer" type="number" placeholder="?" inputmode="numeric">
+          <button class="answer-btn" onclick="checkPlant()">✓</button>
+        </div>
+        <div class="answer-result" id="plant-result"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 7: Harvest -->
+  <div class="page" data-page="7" style="background:linear-gradient(180deg,#1a2a0a 0%,#3d4a2a 50%,#2d3a1a 100%);">
+    <img class="page-illustration" src="images/ch3-planting.png" alt="" style="opacity:0.3;" onerror="this.style.display='none'">
+    <div class="content-center">
+      <div class="interactive-panel" style="border-color:var(--accent-yellow);">
+        <h3>🌾 收获时间！</h3>
+        <div class="question">
+          每颗土豆苗 <span class="highlight">60 天</span> 后结出 <span class="hl-blue">4 个</span> 土豆<br><br>
+          马克种了 <span class="highlight">48 颗</span> 苗<br>
+          60天后能收获多少个土豆？
+        </div>
+        <div id="harvest-animation" style="text-align:center; margin:1rem 0; min-height:3rem;"></div>
+        <div class="answer-row">
+          <span class="answer-label">48 × 4 =</span>
+          <input class="answer-input" id="harvest-answer" type="number" placeholder="?" inputmode="numeric">
+          <button class="answer-btn" onclick="checkHarvest()">✓</button>
+        </div>
+        <div class="answer-result" id="harvest-result"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 8: End -->
+  <div class="page" data-page="8" style="background:linear-gradient(180deg,#000 0%,#1a2a0e 50%,#2d4b1a 100%);">
+    <div class="stars" id="end-stars"></div>
+    <div class="content-center">
+      <div class="text-bubble" style="text-align:center;">
+        马克的火星农场<span class="hl-green">开张了</span>！🌱🥔<br><br>
+        24 平方米的地，48 颗苗，<br>
+        60天后能收获 <span class="highlight">192 个土豆</span>！<br><br>
+        <span style="font-size:2rem;">🥔🥔🥔🥔🥔🥔🥔🥔</span><br><br>
+        但马克还有一个大问题——<br>
+        <span class="highlight">怎么告诉地球他还活着？</span><br><br>
+        <span style="font-size:1.3em;">下一章：和地球说话 📡</span><br>
+        <span style="font-size:0.9em; opacity:0.6;">火星离地球有多远？信号要飞多久？</span><br><br>
+        <a class="ch-link" href="ch4.html">下一章 →</a><br>
+        <a class="ch-link-back" href="ch2.html">← 上一章</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="potato-counter" id="potato-counter">🥔 × <span id="potato-count">0</span></div>
+<div class="nav-area left" onclick="prevPage()"><div class="nav-hint">‹</div></div>
+<div class="nav-area right" onclick="nextPage()"><div class="nav-hint">›</div></div>
+<div class="page-counter" id="page-counter"></div>
+
+<script>
+  const pages=document.querySelectorAll('.page'); let currentPage=0; let potatoes=0;
+  const counter=document.getElementById('page-counter');
+  pages.forEach((_,i)=>{const d=document.createElement('div');d.className='page-dot'+(i===0?' active':'');counter.appendChild(d);});
+  function goToPage(n){if(n<0||n>=pages.length)return;pages[currentPage].className='page'+(n>currentPage?' prev':'');currentPage=n;pages[currentPage].className='page active';document.querySelectorAll('.page-dot').forEach((d,i)=>{d.className='page-dot'+(i===currentPage?' active':'');});}
+  function nextPage(){goToPage(currentPage+1)} function prevPage(){goToPage(currentPage-1)}
+  let tx=0;document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX});document.addEventListener('touchend',e=>{const d=tx-e.changedTouches[0].clientX;if(Math.abs(d)>50){d>0?nextPage():prevPage()}});
+  document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' ')nextPage();if(e.key==='ArrowLeft')prevPage();});
+  function createStars(id,c=80){const el=document.getElementById(id);if(!el)return;for(let i=0;i<c;i++){const s=document.createElement('div');s.className='star';const sz=Math.random()*3+1;s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--duration:${Math.random()*3+2}s;animation-delay:${Math.random()*3}s;`;el.appendChild(s);}}
+  createStars('cover-stars',120);createStars('sci-stars-1',60);createStars('end-stars',100);
+
+  function addPotato(n=1){potatoes+=n;document.getElementById('potato-count').textContent=potatoes;try{localStorage.setItem('mars-potatoes',(parseInt(localStorage.getItem('mars-potatoes')||'0')+n))}catch(e){}}
+  try{const s=localStorage.getItem('mars-potatoes');if(s){potatoes=parseInt(s);document.getElementById('potato-count').textContent=potatoes;}}catch(e){}
+
+  function toggleAnalogy(id){const b=document.getElementById(id);b.classList.toggle('show');}
+
+  // Four Elements
+  let elemCount=0;
+  function placeElement(el,type){
+    const slot=document.querySelector(`[data-need="${type}"]`);
+    if(slot&&!slot.classList.contains('filled')){
+      slot.classList.add('filled');el.classList.add('used');elemCount++;
+      if(elemCount>=4){document.getElementById('elem-result').innerHTML='🌱 四要素齐了！土豆苗发芽了！<br>🎉 有趣的是，火星空气96%是CO₂——至少这个不缺😄';addPotato(1);}
+    }
+  }
+
+  // Soil Quiz
+  let soilDone=false;
+  function checkSoil(el,correct){
+    if(soilDone)return;const r=document.getElementById('soil-result');
+    if(correct){soilDone=true;el.classList.add('correct');document.querySelectorAll('#quiz-soil .quiz-option').forEach(o=>{if(o!==el)o.classList.add('disabled')});
+      r.innerHTML='✅ <b>没错！💩</b> 便便里有微生物和营养物质！<br>地球农民也用动物粪便给庄稼施肥，一样的道理。<br>虽然有点臭……但这是科学！🧪';r.style.color='var(--accent-green)';addPotato(1);
+    }else{el.classList.add('wrong');r.innerHTML='💡 火星土缺微生物……什么东西里有微生物和营养呢？🤔';setTimeout(()=>{el.classList.remove('wrong');r.innerHTML=''},2000);}
+  }
+
+  // Area Grid
+  const areaGrid=document.getElementById('area-grid');let areaCount=0;let areaDone=false;
+  for(let i=0;i<24;i++){const c=document.createElement('div');c.className='area-cell';c.onclick=function(){if(!this.classList.contains('filled')){this.classList.add('filled');areaCount++;document.getElementById('area-count').textContent=areaCount;}};areaGrid.appendChild(c);}
+  function checkArea(){if(areaDone)return;const v=parseInt(document.getElementById('area-answer').value);const r=document.getElementById('area-result');
+    if(v===24){areaDone=true;r.innerHTML='🎉 <b>对了！</b>6 × 4 = <b>24 平方米</b>！';r.style.color='var(--accent-green)';addPotato(1);}
+    else{r.innerHTML='💡 长6米，宽4米，6个一排，4排……一共几个？';}}
+
+  // Potato Planting
+  const potatoGrid=document.getElementById('potato-grid');let plantCount=0;let plantDone=false;
+  for(let i=0;i<24;i++){const c=document.createElement('div');c.className='potato-cell';c.onclick=function(){if(!this.classList.contains('planted')){this.classList.add('planted');this.innerHTML='🥔🥔';plantCount+=2;document.getElementById('plant-count').textContent=plantCount;}};potatoGrid.appendChild(c);}
+  function checkPlant(){if(plantDone)return;const v=parseInt(document.getElementById('plant-answer').value);const r=document.getElementById('plant-result');
+    if(v===48){plantDone=true;r.innerHTML='🎉 <b>对了！</b>24 × 2 = <b>48 颗</b>土豆苗种下去了！🌱';r.style.color='var(--accent-green)';addPotato(1);}
+    else{r.innerHTML='💡 24块地，每块种2颗……24 × 2 = ？';}}
+
+  // Harvest
+  let harvestDone=false;
+  function checkHarvest(){if(harvestDone)return;const v=parseInt(document.getElementById('harvest-answer').value);const r=document.getElementById('harvest-result');const a=document.getElementById('harvest-animation');
+    if(v===192){harvestDone=true;r.innerHTML='🎉 <b>对了！</b>48 × 4 = <b>192 个土豆</b>！大丰收！🥔🥔🥔';r.style.color='var(--accent-green)';
+      a.innerHTML='🥔'.repeat(20)+'<br>'+' 🌾 60天后的火星农场 🌾';addPotato(2);}
+    else{r.innerHTML='💡 48颗苗，每颗结4个……48 × 4 = ？试试看！';}}
+</script>
+</body>
+</html>

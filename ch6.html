@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>火星种土豆 · 第六章：回家</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Ma+Shan+Zheng&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--text-primary:#f5f0e8;--accent-warm:#ff6b35;--accent-blue:#4ecdc4;--accent-yellow:#ffe66d;--accent-green:#2ecc71;--science-bg:rgba(30,60,114,0.95);--analogy-bg:rgba(255,107,53,0.95)}
+  html,body{width:100%;height:100%;overflow:hidden;font-family:'ZCOOL KuaiLe','Ma Shan Zheng',sans-serif;background:#0a0a2e;touch-action:pan-y;-webkit-user-select:none;user-select:none}
+  .book{width:100%;height:100%;position:relative;overflow:hidden}
+  .page{position:absolute;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transform:translateX(100%);transition:all 0.6s cubic-bezier(0.25,0.46,0.45,0.94);pointer-events:none;overflow:hidden}
+  .page.active{opacity:1;transform:translateX(0);pointer-events:all}.page.prev{opacity:0;transform:translateX(-100%)}
+  .page-illustration{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:0}
+  .cover{background:linear-gradient(135deg,#0a0a2e,#1a1a4e,#2d1b69)}.cover-title{font-size:clamp(2.5rem,8vw,5rem);color:var(--accent-yellow);text-shadow:3px 3px 0 rgba(0,0,0,0.3);z-index:2;text-align:center;line-height:1.3}
+  .cover-subtitle{font-size:clamp(1rem,3vw,1.8rem);color:var(--text-primary);opacity:0.8;margin-top:1rem;z-index:2}
+  .cover-chapter{font-size:clamp(1.2rem,3.5vw,2rem);color:var(--accent-blue);margin-top:2rem;z-index:2}
+  .cover-tap{position:absolute;bottom:8%;font-size:clamp(0.9rem,2.5vw,1.2rem);color:var(--text-primary);opacity:0.5;animation:pulse 2s infinite;z-index:2}
+  @keyframes pulse{0%,100%{opacity:0.3}50%{opacity:0.7}}
+  .stars{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1}.star{position:absolute;background:white;border-radius:50%;animation:twinkle var(--duration) infinite}
+  @keyframes twinkle{0%,100%{opacity:0.2}50%{opacity:1}}
+  .text-bubble{position:relative;z-index:10;background:rgba(0,0,0,0.7);color:var(--text-primary);padding:clamp(1rem,3vw,2rem) clamp(1.5rem,4vw,2.5rem);border-radius:24px;max-width:80%;font-size:clamp(1.1rem,3vw,1.6rem);line-height:1.8;box-shadow:0 8px 32px rgba(0,0,0,0.3);border:2px solid var(--accent-yellow)}
+  .text-bubble.mark{background:rgba(255,107,53,0.15);border-color:var(--accent-warm)}
+  .highlight{color:var(--accent-warm);font-weight:bold}.hl-blue{color:var(--accent-blue);font-weight:bold}.hl-green{color:var(--accent-green);font-weight:bold}
+  .science-panel{position:relative;z-index:10;width:85%;max-width:900px}
+  .science-main{background:var(--science-bg);color:var(--text-primary);padding:clamp(1.2rem,3vw,2rem) clamp(1.5rem,4vw,2.5rem);border-radius:20px;font-size:clamp(1rem,2.5vw,1.4rem);line-height:2;border:3px solid var(--accent-blue)}
+  .science-main h3{color:var(--accent-yellow);font-size:clamp(1.3rem,3.5vw,1.8rem);margin-bottom:0.8rem}.term{color:var(--accent-blue);font-weight:bold}
+  .analogy-btn{display:inline-block;margin-top:1rem;padding:0.6rem 1.5rem;background:var(--accent-warm);color:white;border:none;border-radius:30px;font-family:inherit;font-size:clamp(0.9rem,2.5vw,1.2rem);cursor:pointer}
+  .analogy-box{margin-top:1rem;background:var(--analogy-bg);color:white;padding:clamp(1rem,2.5vw,1.5rem);border-radius:16px;font-size:clamp(1rem,2.5vw,1.3rem);line-height:1.8;display:none;border:2px dashed var(--accent-yellow)}
+  .analogy-box.show{display:block;animation:slideDown 0.4s ease}
+  @keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+  .interactive-panel{position:relative;z-index:10;width:85%;max-width:800px;background:rgba(0,0,0,0.5);border-radius:20px;padding:clamp(1rem,3vw,2rem);border:3px solid var(--accent-blue)}
+  .interactive-panel h3{color:var(--accent-yellow);font-size:clamp(1.2rem,3vw,1.6rem);margin-bottom:1rem}
+  .question{font-size:clamp(1.1rem,2.8vw,1.5rem);color:var(--text-primary);line-height:1.8;margin-bottom:1rem}
+
+  /* Quiz options */
+  .quiz-options{display:flex;flex-direction:column;gap:0.8rem;margin-top:0.5rem}
+  .quiz-option{padding:0.8rem 1.2rem;border-radius:16px;cursor:pointer;font-family:inherit;font-size:clamp(1rem,2.5vw,1.3rem);border:3px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.1);color:var(--text-primary);transition:all 0.3s;text-align:left}
+  .quiz-option.correct{background:rgba(46,204,113,0.3);border-color:#2ecc71}
+  .quiz-option.wrong{background:rgba(231,76,60,0.3);border-color:#e74c3c;animation:shake 0.5s ease}
+  .quiz-option.disabled{pointer-events:none;opacity:0.5}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+
+  /* Countdown Clock */
+  .countdown-area{text-align:center;margin:1rem 0}
+  .clock-display{font-size:clamp(3rem,8vw,5rem);color:var(--accent-yellow);font-family:monospace;margin:1rem 0;text-shadow:0 0 20px rgba(255,230,109,0.5)}
+  .clock-label{font-size:clamp(1rem,2.5vw,1.3rem);color:var(--text-primary);margin-bottom:0.5rem}
+  .answer-row{display:flex;align-items:center;justify-content:center;gap:0.8rem;margin-top:1rem;flex-wrap:wrap}
+  .answer-label{font-size:clamp(1rem,2.5vw,1.3rem);color:var(--text-primary)}
+  .answer-input{width:5rem;padding:0.5rem;border-radius:12px;border:2px solid var(--accent-blue);background:rgba(255,255,255,0.1);color:var(--text-primary);font-family:inherit;font-size:clamp(1.2rem,3vw,1.5rem);text-align:center}
+  .answer-btn{padding:0.5rem 1.2rem;background:var(--accent-green);color:white;border:none;border-radius:12px;font-family:inherit;font-size:clamp(1rem,2.5vw,1.2rem);cursor:pointer}
+  .answer-result{font-size:clamp(1rem,2.5vw,1.3rem);color:var(--accent-yellow);text-align:center;margin-top:0.5rem;min-height:2em}
+
+  /* Speed Match */
+  .speed-match{text-align:center;margin:1rem 0}
+  .speed-bars-area{display:flex;flex-direction:column;gap:1rem;margin:1rem 0}
+  .speed-row{display:flex;align-items:center;gap:0.8rem}
+  .speed-icon{font-size:clamp(1.8rem,5vw,3rem);min-width:3rem;text-align:center}
+  .speed-track{flex:1;height:30px;background:rgba(255,255,255,0.1);border-radius:15px;overflow:hidden;position:relative}
+  .speed-fill{height:100%;border-radius:15px;transition:width 1s ease;display:flex;align-items:center;padding-left:8px;font-size:clamp(0.8rem,2vw,1rem);color:white;font-weight:bold}
+  .speed-fill.ship{background:linear-gradient(90deg,#4ecdc4,#2ecc71)}
+  .speed-fill.mark{background:linear-gradient(90deg,#e74c3c,#ff6b35)}
+  .speed-slider-area{margin-top:1rem}
+  .speed-slider{width:80%;max-width:400px;margin:0 auto;-webkit-appearance:none;appearance:none;height:8px;background:rgba(255,255,255,0.2);border-radius:4px;outline:none}
+  .speed-slider::-webkit-slider-thumb{-webkit-appearance:none;width:30px;height:30px;border-radius:50%;background:var(--accent-yellow);cursor:pointer}
+  .speed-value{font-size:clamp(1.5rem,4vw,2.5rem);color:var(--accent-yellow);margin:0.5rem 0}
+
+  /* Catch Game */
+  .catch-game{position:relative;width:100%;height:40vh;overflow:hidden;border-radius:16px;background:linear-gradient(180deg,#000 0%,#0a0a2e 100%);border:2px solid rgba(255,255,255,0.1);margin:0.5rem 0}
+  .catch-ship{position:absolute;right:10%;top:20%;font-size:clamp(2.5rem,6vw,4rem);transition:top 0.3s}
+  .catch-mark{position:absolute;left:5%;font-size:clamp(2.5rem,6vw,4rem);transition:all 0.5s}
+  .catch-btn{position:absolute;bottom:10%;left:50%;transform:translateX(-50%);padding:1rem 2.5rem;background:var(--accent-warm);color:white;border:none;border-radius:30px;font-family:inherit;font-size:clamp(1.2rem,3vw,1.6rem);cursor:pointer;z-index:10;animation:pulse 1s infinite}
+  .catch-btn:active{transform:translateX(-50%) scale(0.95)}
+  .catch-result{font-size:clamp(1.1rem,2.8vw,1.4rem);color:var(--accent-yellow);text-align:center;margin-top:0.5rem;min-height:2em}
+
+  /* Finale */
+  .finale-card{position:relative;z-index:10;width:85%;max-width:800px;background:rgba(0,0,0,0.6);border-radius:24px;padding:clamp(1.5rem,4vw,3rem);border:3px solid var(--accent-yellow);text-align:center}
+  .finale-title{font-size:clamp(1.8rem,5vw,3rem);color:var(--accent-yellow);margin-bottom:1rem}
+  .finale-stats{display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;margin:1rem 0}
+  .stat-item{background:rgba(255,255,255,0.08);border-radius:16px;padding:0.8rem 1.2rem;min-width:120px}
+  .stat-emoji{font-size:1.8rem}
+  .stat-label{font-size:clamp(0.8rem,2vw,1rem);color:rgba(255,255,255,0.7);margin-top:0.3rem}
+  .stat-value{font-size:clamp(1.1rem,2.8vw,1.4rem);color:var(--accent-yellow);font-weight:bold}
+  .confetti{position:absolute;width:10px;height:10px;border-radius:2px;animation:confettiFall var(--fall-dur,3s) linear forwards;z-index:5}
+  @keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+
+  .nav-area{position:absolute;top:0;width:25%;height:100%;z-index:50;cursor:pointer}.nav-area.left{left:0}.nav-area.right{right:0}
+  .nav-hint{position:absolute;top:50%;transform:translateY(-50%);font-size:2.5rem;color:white;opacity:0;transition:opacity 0.3s;pointer-events:none}
+  .nav-area:hover .nav-hint{opacity:0.5}.nav-area.left .nav-hint{left:1rem}.nav-area.right .nav-hint{right:1rem}
+  .page-counter{position:fixed;bottom:1.5%;left:50%;transform:translateX(-50%);z-index:100;display:flex;gap:8px}
+  .page-dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.3);transition:all 0.3s}.page-dot.active{background:var(--accent-yellow);transform:scale(1.3)}
+  .potato-counter{position:fixed;top:1.5%;right:1.5%;z-index:200;background:rgba(0,0,0,0.6);padding:0.4rem 0.8rem;border-radius:20px;font-size:clamp(0.9rem,2.5vw,1.2rem);color:var(--accent-yellow);border:2px solid rgba(255,230,109,0.3)}
+  .content-bottom{position:absolute;bottom:8%;width:100%;display:flex;flex-direction:column;align-items:center;z-index:10}
+  .content-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:100%;display:flex;flex-direction:column;align-items:center;z-index:10}
+  .ch-link-back{display:inline-block;margin-top:0.5rem;padding:0.5rem 1.2rem;background:rgba(255,255,255,0.15);color:var(--text-primary);border-radius:20px;text-decoration:none;font-size:0.9em}
+  @media(orientation:portrait){.text-bubble{max-width:90%}.science-panel,.interactive-panel{width:92%}}
+</style>
+</head>
+<body>
+<div class="book" id="book">
+
+  <div class="page cover active" data-page="0">
+    <div class="stars" id="cover-stars"></div>
+    <div class="cover-title">🥔 火星种土豆</div>
+    <div class="cover-subtitle">第六章（最终章）</div>
+    <div class="cover-chapter">回家 🏠🚀</div>
+    <div class="cover-tap">👆 点击右边翻页</div>
+  </div>
+
+  <!-- Page 1: The Plan -->
+  <div class="page" data-page="1" style="background:linear-gradient(180deg,#0a0a2e 0%,#1a1a3e 50%,#0f0c29 100%);">
+    <img class="page-illustration" src="images/ch6-launch.png" alt="" onerror="this.style.display='none'">
+    <div class="content-bottom">
+      <div class="text-bubble narrator">
+        经过漫长的等待，救援飞船终于来了！🚀<br><br>
+        但飞船<span class="highlight">不能降落在火星上</span>——<br>
+        火星的大气太薄，大飞船没法减速着陆。<br><br>
+        计划是这样的：<br>
+        马克要坐一个<span class="highlight">小火箭</span>飞上天，<br>
+        和正在火星上空飞过的飞船<span class="hl-blue">会合</span>！<br><br>
+        就像在高速公路上<span class="highlight">跳上一辆飞驰的车</span> 😱
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 2: Science — Orbit -->
+  <div class="page" data-page="2" style="background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);">
+    <div class="stars" id="sci-stars-1"></div>
+    <div class="content-center">
+      <div class="science-panel">
+        <div class="science-main">
+          <h3>🔬 科学时间：什么是轨道？</h3>
+          <p>飞船不能"停"在火星上空等马克——<br><span class="term">太空里没有刹车</span>！🚫🛑</p>
+          <p>飞船绕着火星<span class="term">一圈一圈地飞</span>，<br>这条路线叫 <span class="term">"轨道"</span>。</p>
+          <button class="analogy-btn" onclick="toggleAnalogy('a-orbit')">🤔 什么意思？看比喻</button>
+          <div class="analogy-box" id="a-orbit">
+            🏃 想象你在操场上<b>不停跑圈</b>——<br>
+            你不能停下来（太空里不能停）<br><br>
+            马克站在操场中间⭕<br>
+            他要在你<b>跑过他面前的那一瞬间</b>——<br>
+            <b>跳上来！</b>🦘<br><br>
+            太早了？你还没到 ❌<br>
+            太晚了？你已经跑过去了 ❌<br>
+            <b>时机必须刚刚好！</b>⏰✨
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 3: Science — Zero Gravity -->
+  <div class="page" data-page="3" style="background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);">
+    <div class="stars" id="sci-stars-2"></div>
+    <div class="content-center">
+      <div class="interactive-panel" style="border-color:var(--accent-blue);">
+        <h3>🧠 动脑时间：太空中的水</h3>
+        <div class="question">
+          太空里<span class="highlight">引力很小</span>，东西会飘。<br>
+          如果在太空里倒一杯水，会怎样？
+        </div>
+        <div class="quiz-options" id="quiz-water">
+          <div class="quiz-option" onclick="checkWater(this,false)">A. 正常倒进杯子 🥛</div>
+          <div class="quiz-option" onclick="checkWater(this,true)">B. 水飘成一个圆球 💧</div>
+          <div class="quiz-option" onclick="checkWater(this,false)">C. 水变成冰 🧊</div>
+        </div>
+        <div class="answer-result" id="water-result"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 4: Countdown -->
+  <div class="page" data-page="4" style="background:linear-gradient(180deg,#0d1b2a 0%,#1b2838 100%);">
+    <div class="stars" id="countdown-stars"></div>
+    <div class="content-center">
+      <div class="interactive-panel" style="border-color:var(--accent-warm);">
+        <h3>⏱️ 发射倒计时！</h3>
+        <div class="question">
+          飞船 <span class="highlight">10 分钟</span> 后飞过火星上空<br>
+          火箭准备需要 <span class="hl-blue">7 分钟</span><br>
+          最晚什么时候必须开始准备？
+        </div>
+        <div class="countdown-area">
+          <div class="clock-label">倒计时</div>
+          <div class="clock-display" id="clock-display">10:00</div>
+        </div>
+        <div class="answer-row">
+          <span class="answer-label">10 - 7 = 最晚还剩</span>
+          <input class="answer-input" id="countdown-answer" type="number" placeholder="?" inputmode="numeric">
+          <span class="answer-label">分钟时开始</span>
+          <button class="answer-btn" onclick="checkCountdown()">✓</button>
+        </div>
+        <div class="answer-result" id="countdown-result"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 5: Speed Match -->
+  <div class="page" data-page="5" style="background:linear-gradient(180deg,#0d1b2a 0%,#1b2838 100%);">
+    <div class="content-center">
+      <div class="interactive-panel">
+        <h3>🎯 速度匹配！</h3>
+        <div class="question">
+          飞船速度 <span class="hl-blue">8</span>，马克速度 <span class="highlight">5</span><br>
+          拖动滑块帮马克加速到和飞船一样快！
+        </div>
+        <div class="speed-match">
+          <div class="speed-bars-area">
+            <div class="speed-row">
+              <div class="speed-icon">🚀</div>
+              <div class="speed-track"><div class="speed-fill ship" style="width:80%"><span>飞船: 8</span></div></div>
+            </div>
+            <div class="speed-row">
+              <div class="speed-icon">🧑‍🚀</div>
+              <div class="speed-track"><div class="speed-fill mark" id="mark-speed-bar" style="width:50%"><span id="mark-speed-text">马克: 5</span></div></div>
+            </div>
+          </div>
+          <div class="speed-slider-area">
+            <div class="speed-value">马克速度: <span id="speed-val">5</span></div>
+            <input type="range" class="speed-slider" id="speed-slider" min="1" max="10" value="5" oninput="updateSpeed(this.value)">
+          </div>
+          <button class="answer-btn" onclick="checkSpeed()" style="margin-top:0.5rem">✓ 确认速度</button>
+          <div class="answer-result" id="speed-result"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 6: Catch Game -->
+  <div class="page" data-page="6" style="background:linear-gradient(180deg,#000 0%,#0a0a2e 50%,#1a1a3e 100%);">
+    <div class="stars" id="catch-stars"></div>
+    <div class="content-center">
+      <div class="interactive-panel" style="border-color:var(--accent-warm);">
+        <h3>✋ 太空抓手！</h3>
+        <div class="question">马克飞上来了！队友要伸手抓住他——<br>在马克飘到<span class="highlight">正确位置</span>时按"抓住！"</div>
+        <div class="catch-game" id="catch-game">
+          <div class="catch-ship" id="catch-ship">🚀</div>
+          <div class="catch-mark" id="catch-mark" style="top:80%;left:5%;">🧑‍🚀</div>
+          <button class="catch-btn" id="catch-btn" onclick="tryCatch()">✋ 抓住！</button>
+        </div>
+        <div class="catch-result" id="catch-result"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 7: Reunion -->
+  <div class="page" data-page="7" style="background:linear-gradient(180deg,#0a0a2e 0%,#1a1a4e 50%,#2d1b69 100%);">
+    <img class="page-illustration" src="images/ch6-rescue.png" alt="" onerror="this.style.display='none'">
+    <div class="content-bottom">
+      <div class="text-bubble narrator" style="text-align:center;">
+        <span style="font-size:2rem;">🎉🎉🎉</span><br><br>
+        队友们抓住了马克！<br><br>
+        <span class="highlight" style="font-size:1.3em;">"欢迎回来！！！"</span> 😭🤗<br><br>
+        马克在火星上独自生活了<span class="hl-blue">500多天</span>，<br>
+        靠着自己的<span class="highlight">大脑</span>、<span class="hl-green">科学知识</span>、<br>
+        和<span class="highlight">永不放弃的心</span>——<br><br>
+        他<span class="hl-green">活下来了</span>，而且<span class="highlight">回家了</span>。🏠
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 8: Finale -->
+  <div class="page" data-page="8" style="background:linear-gradient(180deg,#000 0%,#0a0a2e 50%,#1a1a4e 100%);">
+    <div class="stars" id="finale-stars"></div>
+    <div class="content-center" id="finale-area">
+      <div class="finale-card">
+        <div class="finale-title">🥔 火星生存手册 📖</div>
+        <div style="font-size:clamp(1rem,2.5vw,1.3rem);color:var(--text-primary);line-height:1.8;margin-bottom:1rem;">
+          马克用科学知识在火星活了下来！<br>你在这趟冒险里学到了：
+        </div>
+        <div class="finale-stats">
+          <div class="stat-item"><div class="stat-emoji">🔴</div><div class="stat-label">天文</div><div class="stat-value">火星引力</div></div>
+          <div class="stat-item"><div class="stat-emoji">🌬️</div><div class="stat-label">天文</div><div class="stat-value">火星空气</div></div>
+          <div class="stat-item"><div class="stat-emoji">🍎</div><div class="stat-label">生物</div><div class="stat-value">卡路里</div></div>
+          <div class="stat-item"><div class="stat-emoji">🌱</div><div class="stat-label">生物</div><div class="stat-value">光合作用</div></div>
+          <div class="stat-item"><div class="stat-emoji">💡</div><div class="stat-label">物理</div><div class="stat-value">光速</div></div>
+          <div class="stat-item"><div class="stat-emoji">☀️</div><div class="stat-label">物理</div><div class="stat-value">太阳能</div></div>
+          <div class="stat-item"><div class="stat-emoji">🪐</div><div class="stat-label">天文</div><div class="stat-value">太阳系</div></div>
+          <div class="stat-item"><div class="stat-emoji">🌀</div><div class="stat-label">物理</div><div class="stat-value">轨道</div></div>
+        </div>
+        <div style="font-size:clamp(1.2rem,3vw,1.6rem);color:var(--accent-yellow);margin:1rem 0;">
+          收获土豆：🥔 × <span id="final-potatoes">0</span>
+        </div>
+        <div style="font-size:clamp(1rem,2.5vw,1.3rem);color:var(--text-primary);opacity:0.8;margin-bottom:1rem;">
+          — 完 —<br>
+          <span style="font-size:0.85em;">和爸爸一起边吃土豆边看《火星救援》后制作 🥔</span>
+        </div>
+        <a class="ch-link-back" href="index.html">← 回到目录</a>
+        <a class="ch-link-back" href="ch5.html">← 上一章</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="potato-counter" id="potato-counter">🥔 × <span id="potato-count">0</span></div>
+<div class="nav-area left" onclick="prevPage()"><div class="nav-hint">‹</div></div>
+<div class="nav-area right" onclick="nextPage()"><div class="nav-hint">›</div></div>
+<div class="page-counter" id="page-counter"></div>
+
+<script>
+  const pages=document.querySelectorAll('.page');let currentPage=0,potatoes=0;
+  const ctr=document.getElementById('page-counter');
+  pages.forEach((_,i)=>{const d=document.createElement('div');d.className='page-dot'+(i===0?' active':'');ctr.appendChild(d);});
+  function goToPage(n){if(n<0||n>=pages.length)return;pages[currentPage].className='page'+(n>currentPage?' prev':'');currentPage=n;pages[currentPage].className='page active';document.querySelectorAll('.page-dot').forEach((d,i)=>{d.className='page-dot'+(i===currentPage?' active':'')});
+    if(currentPage===6)startCatchGame();if(currentPage===8){showFinale();launchConfetti();}}
+  function nextPage(){goToPage(currentPage+1)}function prevPage(){goToPage(currentPage-1)}
+  let tx=0;document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX});document.addEventListener('touchend',e=>{const d=tx-e.changedTouches[0].clientX;if(Math.abs(d)>50){d>0?nextPage():prevPage()}});
+  document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' ')nextPage();if(e.key==='ArrowLeft')prevPage()});
+  function createStars(id,c=80){const el=document.getElementById(id);if(!el)return;for(let i=0;i<c;i++){const s=document.createElement('div');s.className='star';const sz=Math.random()*3+1;s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--duration:${Math.random()*3+2}s;animation-delay:${Math.random()*3}s;`;el.appendChild(s);}}
+  createStars('cover-stars',120);createStars('sci-stars-1',60);createStars('sci-stars-2',60);createStars('countdown-stars',50);createStars('catch-stars',80);createStars('finale-stars',150);
+  function addPotato(n=1){potatoes+=n;document.getElementById('potato-count').textContent=potatoes;try{localStorage.setItem('mars-potatoes',(parseInt(localStorage.getItem('mars-potatoes')||'0')+n))}catch(e){}}
+  try{const s=localStorage.getItem('mars-potatoes');if(s){potatoes=parseInt(s);document.getElementById('potato-count').textContent=potatoes;}}catch(e){}
+  function toggleAnalogy(id){document.getElementById(id).classList.toggle('show')}
+
+  // Water Quiz
+  let waterDone=false;
+  function checkWater(el,correct){if(waterDone)return;const r=document.getElementById('water-result');
+    if(correct){waterDone=true;el.classList.add('correct');document.querySelectorAll('#quiz-water .quiz-option').forEach(o=>{if(o!==el)o.classList.add('disabled')});
+      r.innerHTML='✅ <b>对了！💧</b> 没有引力拉，水不会往下流，<br>表面张力让水缩成一个完美的圆球！<br>宇航员在空间站里真的玩过水球哦 🫧';r.style.color='var(--accent-green)';addPotato(1);
+    }else{el.classList.add('wrong');r.innerHTML='💡 太空里东西会飘……水也会飘 🤔';setTimeout(()=>{el.classList.remove('wrong');r.innerHTML=''},2000);}}
+
+  // Countdown
+  let countdownDone=false;
+  function checkCountdown(){if(countdownDone)return;const v=parseInt(document.getElementById('countdown-answer').value);const r=document.getElementById('countdown-result');
+    if(v===3){countdownDone=true;r.innerHTML='🎉 <b>对了！</b>10 - 7 = <b>3</b>！最晚还剩3分钟时必须开始准备！<br>一秒都不能耽误 ⏱️';r.style.color='var(--accent-green)';addPotato(1);
+      // Animate clock
+      let t=180;const iv=setInterval(()=>{t--;const m=Math.floor(t/60);const s=t%60;document.getElementById('clock-display').textContent=`${m}:${s.toString().padStart(2,'0')}`;if(t<=0){clearInterval(iv);document.getElementById('clock-display').textContent='🚀 发射！';document.getElementById('clock-display').style.color='var(--accent-green)';}},50);
+    }else{r.innerHTML='💡 飞船10分钟后来，准备要7分钟…… 10 - 7 = ？';}}
+
+  // Speed Match
+  function updateSpeed(v){
+    v=parseInt(v);document.getElementById('speed-val').textContent=v;
+    document.getElementById('mark-speed-bar').style.width=(v*10)+'%';
+    document.getElementById('mark-speed-text').textContent='马克: '+v;
+    if(v<=3)document.getElementById('mark-speed-bar').className='speed-fill mark';
+    else if(v>=8)document.getElementById('mark-speed-bar').className='speed-fill ship';
+  }
+  let speedDone=false;
+  function checkSpeed(){if(speedDone)return;const v=parseInt(document.getElementById('speed-slider').value);const r=document.getElementById('speed-result');
+    if(v===8){speedDone=true;r.innerHTML='🎉 <b>完美！</b>速度匹配！5 + 3 = 8 ✅<br>马克和飞船一样快了，可以对接！';r.style.color='var(--accent-green)';addPotato(1);
+    }else if(v<8){r.innerHTML='💡 还不够快！飞船是8，再加速一点……';}
+    else{r.innerHTML='💡 太快了！会飞过头的，减速到8 🎯';}}
+
+  // Catch Game
+  let catchStarted=false,catchDone=false,markY=80,markMoving=false;
+  function startCatchGame(){
+    if(catchStarted)return;catchStarted=true;
+    const mark=document.getElementById('catch-mark');markY=80;
+    const moveUp=()=>{if(catchDone)return;markY-=0.5;if(markY<-20)markY=80;
+      mark.style.top=markY+'%';mark.style.left=(5+Math.min((80-markY)*0.8,70))+'%';
+      requestAnimationFrame(moveUp);};
+    moveUp();
+  }
+  function tryCatch(){
+    if(catchDone)return;const r=document.getElementById('catch-result');
+    if(markY>=15&&markY<=30){
+      catchDone=true;
+      document.getElementById('catch-mark').style.top='20%';document.getElementById('catch-mark').style.left='65%';
+      document.getElementById('catch-btn').style.display='none';
+      r.innerHTML='🎉🎉🎉 <b>抓住了！！！</b>马克回来了！😭🤗';addPotato(2);
+    }else if(markY>30){r.innerHTML='⏳ 再等等，马克还没飞到……';}
+    else{r.innerHTML='😅 太晚了！再试一次——等他飘到飞船旁边';}}
+
+  // Finale
+  function showFinale(){document.getElementById('final-potatoes').textContent=potatoes;}
+  function launchConfetti(){
+    const area=document.getElementById('finale-area');
+    const colors=['#ff6b35','#4ecdc4','#ffe66d','#2ecc71','#e74c3c','#9b59b6'];
+    for(let i=0;i<50;i++){const c=document.createElement('div');c.className='confetti';c.style.cssText=`left:${Math.random()*100}%;top:${-Math.random()*20}%;background:${colors[Math.floor(Math.random()*colors.length)]};--fall-dur:${Math.random()*2+2}s;animation-delay:${Math.random()*2}s;width:${Math.random()*8+4}px;height:${Math.random()*8+4}px;`;area.appendChild(c);}
+  }
+</script>
+</body>
+</html>

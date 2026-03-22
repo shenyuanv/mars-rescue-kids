@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>火星种土豆 · 第四章：和地球说话</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Ma+Shan+Zheng&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--text-primary:#f5f0e8;--accent-warm:#ff6b35;--accent-blue:#4ecdc4;--accent-yellow:#ffe66d;--accent-green:#2ecc71;--science-bg:rgba(30,60,114,0.95);--analogy-bg:rgba(255,107,53,0.95)}
+  html,body{width:100%;height:100%;overflow:hidden;font-family:'ZCOOL KuaiLe','Ma Shan Zheng',sans-serif;background:#0a0a2e;touch-action:pan-y;-webkit-user-select:none;user-select:none}
+  .book{width:100%;height:100%;position:relative;overflow:hidden}
+  .page{position:absolute;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transform:translateX(100%);transition:all 0.6s cubic-bezier(0.25,0.46,0.45,0.94);pointer-events:none;overflow:hidden}
+  .page.active{opacity:1;transform:translateX(0);pointer-events:all}.page.prev{opacity:0;transform:translateX(-100%)}
+  .page-illustration{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:0}
+  .cover{background:linear-gradient(135deg,#0a0a2e,#1a1a4e,#0f0c29)}
+  .cover-title{font-size:clamp(2.5rem,8vw,5rem);color:var(--accent-yellow);text-shadow:3px 3px 0 rgba(0,0,0,0.3);z-index:2;text-align:center;line-height:1.3}
+  .cover-subtitle{font-size:clamp(1rem,3vw,1.8rem);color:var(--text-primary);opacity:0.8;margin-top:1rem;z-index:2}
+  .cover-chapter{font-size:clamp(1.2rem,3.5vw,2rem);color:var(--accent-blue);margin-top:2rem;z-index:2}
+  .cover-tap{position:absolute;bottom:8%;font-size:clamp(0.9rem,2.5vw,1.2rem);color:var(--text-primary);opacity:0.5;animation:pulse 2s infinite;z-index:2}
+  @keyframes pulse{0%,100%{opacity:0.3}50%{opacity:0.7}}
+  .stars{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1}
+  .star{position:absolute;background:white;border-radius:50%;animation:twinkle var(--duration) infinite}
+  @keyframes twinkle{0%,100%{opacity:0.2}50%{opacity:1}}
+  .text-bubble{position:relative;z-index:10;background:rgba(0,0,0,0.7);color:var(--text-primary);padding:clamp(1rem,3vw,2rem) clamp(1.5rem,4vw,2.5rem);border-radius:24px;max-width:80%;font-size:clamp(1.1rem,3vw,1.6rem);line-height:1.8;box-shadow:0 8px 32px rgba(0,0,0,0.3);border:2px solid var(--accent-yellow)}
+  .text-bubble.mark{background:rgba(255,107,53,0.15);border-color:var(--accent-warm)}
+  .highlight{color:var(--accent-warm);font-weight:bold}.hl-blue{color:var(--accent-blue);font-weight:bold}
+  .science-panel{position:relative;z-index:10;width:85%;max-width:900px}
+  .science-main{background:var(--science-bg);color:var(--text-primary);padding:clamp(1.2rem,3vw,2rem) clamp(1.5rem,4vw,2.5rem);border-radius:20px;font-size:clamp(1rem,2.5vw,1.4rem);line-height:2;border:3px solid var(--accent-blue)}
+  .science-main h3{color:var(--accent-yellow);font-size:clamp(1.3rem,3.5vw,1.8rem);margin-bottom:0.8rem}
+  .term{color:var(--accent-blue);font-weight:bold}
+  .analogy-btn{display:inline-block;margin-top:1rem;padding:0.6rem 1.5rem;background:var(--accent-warm);color:white;border:none;border-radius:30px;font-family:inherit;font-size:clamp(0.9rem,2.5vw,1.2rem);cursor:pointer}
+  .analogy-btn:active{transform:scale(0.95)}
+  .analogy-box{margin-top:1rem;background:var(--analogy-bg);color:white;padding:clamp(1rem,2.5vw,1.5rem);border-radius:16px;font-size:clamp(1rem,2.5vw,1.3rem);line-height:1.8;display:none;border:2px dashed var(--accent-yellow)}
+  .analogy-box.show{display:block;animation:slideDown 0.4s ease}
+  @keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+  .interactive-panel{position:relative;z-index:10;width:85%;max-width:800px;background:rgba(0,0,0,0.5);border-radius:20px;padding:clamp(1rem,3vw,2rem);border:3px solid var(--accent-blue)}
+  .interactive-panel h3{color:var(--accent-yellow);font-size:clamp(1.2rem,3vw,1.6rem);margin-bottom:1rem}
+  .question{font-size:clamp(1.1rem,2.8vw,1.5rem);color:var(--text-primary);line-height:1.8;margin-bottom:1rem}
+
+  /* Planet Sort */
+  .planet-tray{display:flex;flex-wrap:wrap;gap:0.6rem;justify-content:center;margin:1rem 0}
+  .planet-btn{padding:0.5rem 0.8rem;border-radius:16px;cursor:pointer;border:2px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:var(--text-primary);font-family:inherit;font-size:clamp(0.9rem,2.2vw,1.1rem);transition:all 0.3s;display:flex;align-items:center;gap:0.3rem}
+  .planet-btn:active{transform:scale(0.95)}.planet-btn.placed{opacity:0.3;pointer-events:none}
+  .planet-slots{display:flex;gap:0.4rem;justify-content:center;flex-wrap:wrap;margin:1rem 0}
+  .planet-slot{width:clamp(2.8rem,7vw,4rem);height:clamp(2.8rem,7vw,4rem);border:2px dashed rgba(255,255,255,0.3);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:clamp(1.5rem,4vw,2rem);transition:all 0.3s}
+  .planet-slot.filled{border-color:var(--accent-green);border-style:solid;background:rgba(46,204,113,0.1)}
+  .planet-slot.wrong-slot{border-color:red;animation:shake 0.4s ease}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+  .planet-result{font-size:clamp(1rem,2.5vw,1.3rem);color:var(--accent-yellow);text-align:center;min-height:2em}
+
+  /* Signal Game */
+  .signal-demo{text-align:center;margin:1rem 0}
+  .signal-path{display:flex;align-items:center;justify-content:center;gap:0.5rem;margin:1rem 0;flex-wrap:wrap}
+  .signal-planet{font-size:clamp(2rem,5vw,3rem)}
+  .signal-dots{display:flex;gap:4px;align-items:center}
+  .signal-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.2);transition:background 0.3s}
+  .signal-dot.active{background:var(--accent-yellow);box-shadow:0 0 8px var(--accent-yellow)}
+  .signal-status{font-size:clamp(1rem,2.5vw,1.3rem);color:var(--accent-yellow);margin-top:0.5rem;min-height:2em}
+  .send-btn{padding:0.8rem 2rem;background:var(--accent-blue);color:white;border:none;border-radius:30px;font-family:inherit;font-size:clamp(1.1rem,2.8vw,1.4rem);cursor:pointer;margin-top:0.5rem}
+  .send-btn:active{transform:scale(0.95)}.send-btn:disabled{opacity:0.4}
+
+  /* Letter Board */
+  .letter-board{display:flex;flex-wrap:wrap;gap:0.4rem;justify-content:center;margin:1rem 0}
+  .letter-key{width:clamp(2.2rem,5.5vw,3rem);height:clamp(2.2rem,5.5vw,3rem);border-radius:8px;border:2px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.08);color:var(--text-primary);font-family:inherit;font-size:clamp(1rem,2.5vw,1.4rem);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+  .letter-key:active{transform:scale(0.9)}.letter-key.used{background:var(--accent-green);border-color:var(--accent-green);color:white}
+  .spelled-word{font-size:clamp(1.5rem,4vw,2.5rem);color:var(--accent-yellow);letter-spacing:0.5rem;min-height:3rem;margin:0.5rem 0}
+  .letter-result{font-size:clamp(1rem,2.5vw,1.3rem);color:var(--accent-yellow);text-align:center;min-height:2em}
+
+  .answer-row{display:flex;align-items:center;justify-content:center;gap:0.8rem;margin-top:1rem;flex-wrap:wrap}
+  .answer-label{font-size:clamp(1rem,2.5vw,1.3rem);color:var(--text-primary)}
+  .answer-input{width:5rem;padding:0.5rem;border-radius:12px;border:2px solid var(--accent-blue);background:rgba(255,255,255,0.1);color:var(--text-primary);font-family:inherit;font-size:clamp(1.2rem,3vw,1.5rem);text-align:center}
+  .answer-btn{padding:0.5rem 1.2rem;background:var(--accent-green);color:white;border:none;border-radius:12px;font-family:inherit;font-size:clamp(1rem,2.5vw,1.2rem);cursor:pointer}
+  .answer-result{font-size:clamp(1rem,2.5vw,1.3rem);color:var(--accent-yellow);text-align:center;margin-top:0.5rem;min-height:2em}
+
+  .nav-area{position:absolute;top:0;width:25%;height:100%;z-index:50;cursor:pointer}
+  .nav-area.left{left:0}.nav-area.right{right:0}
+  .nav-hint{position:absolute;top:50%;transform:translateY(-50%);font-size:2.5rem;color:white;opacity:0;transition:opacity 0.3s;pointer-events:none}
+  .nav-area:hover .nav-hint{opacity:0.5}.nav-area.left .nav-hint{left:1rem}.nav-area.right .nav-hint{right:1rem}
+  .page-counter{position:fixed;bottom:1.5%;left:50%;transform:translateX(-50%);z-index:100;display:flex;gap:8px}
+  .page-dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.3);transition:all 0.3s}
+  .page-dot.active{background:var(--accent-yellow);transform:scale(1.3)}
+  .potato-counter{position:fixed;top:1.5%;right:1.5%;z-index:200;background:rgba(0,0,0,0.6);padding:0.4rem 0.8rem;border-radius:20px;font-size:clamp(0.9rem,2.5vw,1.2rem);color:var(--accent-yellow);border:2px solid rgba(255,230,109,0.3)}
+  .content-bottom{position:absolute;bottom:8%;width:100%;display:flex;flex-direction:column;align-items:center;z-index:10}
+  .content-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:100%;display:flex;flex-direction:column;align-items:center;z-index:10}
+  .ch-link{display:inline-block;margin-top:0.5rem;padding:0.8rem 2rem;background:var(--accent-warm);color:#fff;border-radius:30px;text-decoration:none;font-size:1.1em}
+  .ch-link-back{display:inline-block;margin-top:0.3rem;padding:0.5rem 1.2rem;background:rgba(255,255,255,0.15);color:var(--text-primary);border-radius:20px;text-decoration:none;font-size:0.9em}
+  @media(orientation:portrait){.text-bubble{max-width:90%}.science-panel,.interactive-panel{width:92%}}
+</style>
+</head>
+<body>
+<div class="book" id="book">
+
+  <div class="page cover active" data-page="0">
+    <div class="stars" id="cover-stars"></div>
+    <div class="cover-title">🥔 火星种土豆</div>
+    <div class="cover-subtitle">第四章</div>
+    <div class="cover-chapter">和地球说话 📡</div>
+    <div class="cover-tap">👆 点击右边翻页</div>
+  </div>
+
+  <!-- Page 1: Need to Contact Earth -->
+  <div class="page" data-page="1" style="background:linear-gradient(180deg,#1a0a0a 0%,#0a0a2e 50%,#1a1a3e 100%);">
+    <img class="page-illustration" src="images/ch4-signal.png" alt="" onerror="this.style.display='none'">
+    <div class="content-bottom">
+      <div class="text-bubble mark">
+        土豆种下了，马克终于有了一点希望。🌱<br><br>
+        但地球上的人还以为他<span class="highlight">已经死了</span>！<br><br>
+        如果没人知道他活着，<br>
+        就算他种再多土豆也没用——<br>
+        因为<span class="highlight">没有人会来救他</span>。<br><br>
+        "我必须想办法<span class="hl-blue">联系地球</span>！"
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 2: Science — Solar System -->
+  <div class="page" data-page="2" style="background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);">
+    <div class="stars" id="sci-stars-1"></div>
+    <img class="page-illustration" src="images/ch4-solarsystem.png" alt="" style="opacity:0.25;" onerror="this.style.display='none'">
+    <div class="content-center">
+      <div class="science-panel">
+        <div class="science-main">
+          <h3>🔬 科学时间：火星在哪里？</h3>
+          <p>太阳系有 <span class="term">8 颗行星</span>，像排排站一样绕着太阳转：</p>
+          <p style="font-size:1.1em;text-align:center;">
+            ☀️ → 水星 → 金星 → <span class="term">🌍地球</span> → <span class="term">🔴火星</span> → 木星 → 土星 → 天王星 → 海王星
+          </p>
+          <p>
+            地球排第 <span class="term">3</span>，火星排第 <span class="term">4</span> —— 我们是邻居！<br>
+            但这个邻居<span class="term">超级远</span>：最近时也有 <span class="term">5500 万公里</span>！
+          </p>
+          <p style="font-size:0.9em;opacity:0.8">
+            口诀："<b>水金地火木土天海</b>" 🎵
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 3: Interactive — Planet Sort -->
+  <div class="page" data-page="3" style="background:linear-gradient(180deg,#0d1b2a 0%,#1b2838 100%);">
+    <div class="stars" id="sort-stars"></div>
+    <div class="content-center">
+      <div class="interactive-panel" style="border-color:var(--accent-yellow);">
+        <h3>🪐 行星排排站！</h3>
+        <div class="question">按顺序点击行星，从离太阳最近到最远：<br><span style="font-size:0.85em;opacity:0.7">提示：水金地火木土天海 🎵</span></div>
+        <div style="text-align:center;font-size:2rem;margin-bottom:0.5rem;">☀️ →</div>
+        <div class="planet-slots" id="planet-slots"></div>
+        <div class="planet-tray" id="planet-tray"></div>
+        <div class="planet-result" id="planet-result"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 4: Science — Light Speed -->
+  <div class="page" data-page="4" style="background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);">
+    <div class="stars" id="sci-stars-2"></div>
+    <div class="content-center">
+      <div class="science-panel">
+        <div class="science-main">
+          <h3>🔬 科学时间：宇宙里最快的是什么？</h3>
+          <p><span class="term">光！</span>💡 光每秒跑 <span class="term">30 万公里</span>——</p>
+          <p>1 秒钟就能绕地球 <span class="term">7 圈半</span>！🌍🌍🌍🌍🌍🌍🌍½</p>
+          <p>无线电信号和光一样快。<br>但火星太远了，就算光速也要好几分钟！</p>
+          <button class="analogy-btn" onclick="toggleAnalogy('a-light')">🤔 30万公里有多快？</button>
+          <div class="analogy-box" id="a-light">
+            🚶 走路：1秒走1米<br>
+            🚗 开车：1秒走30米<br>
+            ✈️ 飞机：1秒走250米<br>
+            🚀 火箭：1秒走8000米<br>
+            💡 <b>光：1秒走300,000,000米！</b><br><br>
+            光比最快的火箭还快 <b>37,500 倍</b>！<br>
+            但宇宙实在太大了，连光都觉得远……
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 5: Interactive — Simple Division -->
+  <div class="page" data-page="5" style="background:linear-gradient(180deg,#0d1b2a 0%,#1b2838 100%);">
+    <div class="content-center">
+      <div class="interactive-panel">
+        <h3>🛰️ 信号要飞多久？</h3>
+        <div class="question">
+          先算简单的！<br>
+          如果距离 <span class="highlight">300 万公里</span>，信号每秒飞 <span class="hl-blue">30 万公里</span>
+        </div>
+        <div class="answer-row">
+          <span class="answer-label">300万 ÷ 30万 =</span>
+          <input class="answer-input" id="simple-signal" type="number" placeholder="?" inputmode="numeric">
+          <button class="answer-btn" onclick="checkSimple()">✓</button>
+        </div>
+        <div class="answer-result" id="simple-result"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 6: Signal Delay Experience -->
+  <div class="page" data-page="6" style="background:linear-gradient(180deg,#0a0a2e 0%,#1a1a3e 50%,#0d1b2a 100%);">
+    <div class="stars" id="signal-stars"></div>
+    <div class="content-center">
+      <div class="interactive-panel" style="border-color:var(--accent-warm);">
+        <h3>⏳ 体验信号延迟！</h3>
+        <div class="question">
+          真实距离约 <span class="highlight">5500万公里</span>，信号要飞约 <span class="hl-blue">3分钟</span>！<br>
+          马克说一句→3分钟→地球收到→回一句→又3分钟<br>
+          一来一回 = <span class="highlight">6分钟</span>！<br><br>
+          👆 按"发送"体验延迟（缩短到3秒）
+        </div>
+        <div class="signal-demo">
+          <div class="signal-path">
+            <span class="signal-planet">🧑‍🚀</span>
+            <div class="signal-dots" id="signal-dots"></div>
+            <span class="signal-planet">🌍</span>
+          </div>
+          <button class="send-btn" id="send-btn" onclick="sendSignal()">📡 发送 "HELLO"</button>
+          <div class="signal-status" id="signal-status"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 7: Letter Board -->
+  <div class="page" data-page="7" style="background:linear-gradient(180deg,#1a0a0a 0%,#0a0a2e 50%,#1a1a3e 100%);">
+    <img class="page-illustration" src="images/ch4-signal.png" alt="" style="opacity:0.3;" onerror="this.style.display='none'">
+    <div class="content-center">
+      <div class="interactive-panel" style="border-color:var(--accent-green);">
+        <h3>💬 拼字母！</h3>
+        <div class="question">
+          马克用摄像头对着字母板，一个一个拼<br>
+          帮他拼出 <span class="highlight">"ALIVE"</span>（意思是"活着"）
+        </div>
+        <div class="spelled-word" id="spelled-word">_ _ _ _ _</div>
+        <div class="letter-board" id="letter-board"></div>
+        <div class="letter-result" id="letter-result"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 8: End -->
+  <div class="page" data-page="8" style="background:linear-gradient(180deg,#000 0%,#0a0a2e 50%,#1a1a4e 100%);">
+    <div class="stars" id="end-stars"></div>
+    <div class="content-center">
+      <div class="text-bubble" style="text-align:center;">
+        马克终于让地球知道了——<br>
+        <span class="highlight" style="font-size:1.5em;">他还活着！</span> 🎉📡<br><br>
+        虽然每条消息要等 6 分钟才能收到回复……<br>
+        但总比<span class="hl-blue">没有联系</span>强一百万倍！<br><br>
+        <span style="font-size:1.3em;">下一章：长途旅行 🚗</span><br>
+        <span style="font-size:0.9em;opacity:0.6;">马克要开火星车穿越火星！<br>路有多远？电够不够？🔋</span><br><br>
+        <a class="ch-link" href="ch5.html">下一章 →</a><br>
+        <a class="ch-link-back" href="ch3.html">← 上一章</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="potato-counter" id="potato-counter">🥔 × <span id="potato-count">0</span></div>
+<div class="nav-area left" onclick="prevPage()"><div class="nav-hint">‹</div></div>
+<div class="nav-area right" onclick="nextPage()"><div class="nav-hint">›</div></div>
+<div class="page-counter" id="page-counter"></div>
+
+<script>
+  const pages=document.querySelectorAll('.page');let currentPage=0,potatoes=0;
+  const ctr=document.getElementById('page-counter');
+  pages.forEach((_,i)=>{const d=document.createElement('div');d.className='page-dot'+(i===0?' active':'');ctr.appendChild(d);});
+  function goToPage(n){if(n<0||n>=pages.length)return;pages[currentPage].className='page'+(n>currentPage?' prev':'');currentPage=n;pages[currentPage].className='page active';document.querySelectorAll('.page-dot').forEach((d,i)=>{d.className='page-dot'+(i===currentPage?' active':'')});}
+  function nextPage(){goToPage(currentPage+1)}function prevPage(){goToPage(currentPage-1)}
+  let tx=0;document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX});document.addEventListener('touchend',e=>{const d=tx-e.changedTouches[0].clientX;if(Math.abs(d)>50){d>0?nextPage():prevPage()}});
+  document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' ')nextPage();if(e.key==='ArrowLeft')prevPage();});
+  function createStars(id,c=80){const el=document.getElementById(id);if(!el)return;for(let i=0;i<c;i++){const s=document.createElement('div');s.className='star';const sz=Math.random()*3+1;s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--duration:${Math.random()*3+2}s;animation-delay:${Math.random()*3}s;`;el.appendChild(s);}}
+  createStars('cover-stars',120);createStars('sci-stars-1',60);createStars('sci-stars-2',60);createStars('sort-stars',40);createStars('signal-stars',80);createStars('end-stars',100);
+  function addPotato(n=1){potatoes+=n;document.getElementById('potato-count').textContent=potatoes;try{localStorage.setItem('mars-potatoes',(parseInt(localStorage.getItem('mars-potatoes')||'0')+n))}catch(e){}}
+  try{const s=localStorage.getItem('mars-potatoes');if(s){potatoes=parseInt(s);document.getElementById('potato-count').textContent=potatoes;}}catch(e){}
+  function toggleAnalogy(id){document.getElementById(id).classList.toggle('show')}
+
+  // Planet Sort
+  const planetOrder=['水星','金星','地球','火星','木星','土星','天王星','海王星'];
+  const planetEmojis={'水星':'☿️','金星':'♀️','地球':'🌍','火星':'🔴','木星':'🟤','土星':'🪐','天王星':'💠','海王星':'🔵'};
+  const shuffled=[...planetOrder].sort(()=>Math.random()-0.5);
+  const slots=document.getElementById('planet-slots');const tray=document.getElementById('planet-tray');
+  let placedCount=0;
+  planetOrder.forEach((_,i)=>{const s=document.createElement('div');s.className='planet-slot';s.dataset.idx=i;s.textContent=(i+1);slots.appendChild(s);});
+  shuffled.forEach(name=>{const b=document.createElement('div');b.className='planet-btn';b.dataset.name=name;b.innerHTML=`${planetEmojis[name]} ${name}`;b.onclick=function(){placePlanet(this)};tray.appendChild(b);});
+  function placePlanet(el){
+    const name=el.dataset.name;const expected=planetOrder[placedCount];
+    if(name===expected){el.classList.add('placed');const slot=slots.children[placedCount];slot.textContent=planetEmojis[name];slot.classList.add('filled');placedCount++;
+      if(placedCount>=8){document.getElementById('planet-result').innerHTML='🎉 <b>全对！</b>水金地火木土天海！记住了吗？🪐';addPotato(1);}
+    }else{el.style.animation='shake 0.4s ease';setTimeout(()=>el.style.animation='',400);document.getElementById('planet-result').innerHTML='💡 提示：第'+(placedCount+1)+'个是"'+expected.charAt(0)+'"开头的……';}
+  }
+
+  // Simple Signal
+  let simpleDone=false;
+  function checkSimple(){if(simpleDone)return;const v=parseInt(document.getElementById('simple-signal').value);const r=document.getElementById('simple-result');
+    if(v===10){simpleDone=true;r.innerHTML='🎉 <b>对了！</b>300万 ÷ 30万 = <b>10秒</b>！<br>发一条"你好"，10秒后地球收到💬';r.style.color='var(--accent-green)';addPotato(1);}
+    else{r.innerHTML='💡 300万里面有几个30万？试试 300÷30 🤔';}}
+
+  // Signal Delay
+  const dotsContainer=document.getElementById('signal-dots');
+  for(let i=0;i<12;i++){const d=document.createElement('div');d.className='signal-dot';dotsContainer.appendChild(d);}
+  const signalDots=dotsContainer.querySelectorAll('.signal-dot');
+  let signalSent=false;
+  function sendSignal(){
+    if(signalSent)return;signalSent=true;
+    const btn=document.getElementById('send-btn');const status=document.getElementById('signal-status');
+    btn.disabled=true;status.textContent='📡 发送中...信号正在飞向地球...';
+    let idx=0;const iv=setInterval(()=>{if(idx<signalDots.length){signalDots[idx].classList.add('active');idx++;}else{clearInterval(iv);status.innerHTML='✅ <b>地球收到了！</b>（等了3秒 = 模拟3分钟）<br>一来一回要6分钟！聊天真不容易😅';addPotato(1);setTimeout(()=>{btn.disabled=false;btn.textContent='📡 再发一次';signalSent=false;signalDots.forEach(d=>d.classList.remove('active'));},3000);}
+    },250);
+  }
+
+  // Letter Board
+  const target='ALIVE';let spelled='';const letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const board=document.getElementById('letter-board');
+  letters.split('').forEach(l=>{const k=document.createElement('div');k.className='letter-key';k.textContent=l;k.onclick=function(){typeLetter(this,l)};board.appendChild(k);});
+  let letterDone=false;
+  function typeLetter(el,l){
+    if(letterDone)return;
+    if(l===target[spelled.length]){spelled+=l;el.classList.add('used');
+      const display=target.split('').map((c,i)=>i<spelled.length?c:'_').join(' ');
+      document.getElementById('spelled-word').textContent=display;
+      if(spelled===target){letterDone=true;document.getElementById('letter-result').innerHTML='🎉 <b>A-L-I-V-E！</b>马克告诉地球：我还活着！🧑‍🚀✨';addPotato(1);}
+    }else{el.style.background='rgba(231,76,60,0.3)';setTimeout(()=>el.style.background='',300);
+      document.getElementById('letter-result').innerHTML='💡 下一个字母是 "'+target[spelled.length]+'" 🔤';}
+  }
+</script>
+</body>
+</html>
