@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>火星种土豆 · 第一章：暴风来了！</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Ma+Shan+Zheng&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --page-bg: #1a0a0a;
+    --text-primary: #f5f0e8;
+    --text-dark: #2d2d2d;
+    --accent-warm: #ff6b35;
+    --accent-red: #e74c3c;
+    --accent-blue: #4ecdc4;
+    --accent-yellow: #ffe66d;
+    --accent-mars: #c0392b;
+    --bubble-bg: rgba(255, 255, 255, 0.92);
+    --science-bg: rgba(30, 60, 114, 0.95);
+    --analogy-bg: rgba(255, 107, 53, 0.95);
+    --quiz-bg: rgba(20, 80, 60, 0.95);
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'ZCOOL KuaiLe', 'Ma Shan Zheng', sans-serif;
+    background: var(--page-bg);
+    touch-action: pan-y;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .book { width: 100%; height: 100%; position: relative; overflow: hidden; }
+
+  .page {
+    position: absolute;
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    opacity: 0; transform: translateX(100%);
+    transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    pointer-events: none; overflow: hidden;
+  }
+  .page.active { opacity: 1; transform: translateX(0); pointer-events: all; }
+  .page.prev { opacity: 0; transform: translateX(-100%); }
+
+  /* Cover */
+  .cover { background: linear-gradient(135deg, #1a0a0a, #4a1a1a, #2d1b1b); }
+  .cover-title {
+    font-size: clamp(2.5rem, 8vw, 5rem);
+    color: var(--accent-yellow);
+    text-shadow: 3px 3px 0 rgba(0,0,0,0.3);
+    z-index: 2; text-align: center; line-height: 1.3;
+  }
+  .cover-subtitle {
+    font-size: clamp(1rem, 3vw, 1.8rem);
+    color: var(--text-primary); opacity: 0.8;
+    margin-top: 1rem; z-index: 2;
+  }
+  .cover-chapter {
+    font-size: clamp(1.2rem, 3.5vw, 2rem);
+    color: var(--accent-warm); margin-top: 2rem; z-index: 2;
+  }
+  .cover-tap {
+    position: absolute; bottom: 8%;
+    font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+    color: var(--text-primary); opacity: 0.5;
+    animation: pulse 2s infinite; z-index: 2;
+  }
+  @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.7; } }
+
+  /* Stars & Dust */
+  .stars { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+  .star {
+    position: absolute; background: white; border-radius: 50%;
+    animation: twinkle var(--duration) infinite;
+  }
+  @keyframes twinkle { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
+
+  .dust-particle {
+    position: absolute; border-radius: 50%;
+    animation: dustFloat var(--dust-dur, 8s) infinite linear;
+    opacity: 0.4;
+  }
+  @keyframes dustFloat {
+    0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.5; }
+    90% { opacity: 0.5; }
+    100% { transform: translate(var(--dx, 200px), var(--dy, -100px)) rotate(360deg); opacity: 0; }
+  }
+
+  /* Text Bubbles */
+  .text-bubble {
+    position: relative; z-index: 10;
+    background: var(--bubble-bg); color: var(--text-dark);
+    padding: clamp(1rem, 3vw, 2rem) clamp(1.5rem, 4vw, 2.5rem);
+    border-radius: 24px; max-width: 80%;
+    font-size: clamp(1.1rem, 3vw, 1.6rem); line-height: 1.8;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3); border: 3px solid #333;
+  }
+  .text-bubble.narrator {
+    background: rgba(0,0,0,0.7); color: var(--text-primary);
+    border-color: var(--accent-yellow); border-width: 2px;
+  }
+  .text-bubble.mark {
+    background: rgba(255, 107, 53, 0.15); color: var(--text-primary);
+    border-color: var(--accent-warm); border-width: 2px;
+  }
+  .text-bubble .highlight { color: var(--accent-warm); font-weight: bold; }
+  .text-bubble .highlight-blue { color: var(--accent-blue); font-weight: bold; }
+
+  /* Science Panel */
+  .science-panel { position: relative; z-index: 10; width: 85%; max-width: 900px; }
+  .science-main {
+    background: var(--science-bg); color: var(--text-primary);
+    padding: clamp(1.2rem, 3vw, 2rem) clamp(1.5rem, 4vw, 2.5rem);
+    border-radius: 20px; font-size: clamp(1rem, 2.5vw, 1.4rem); line-height: 2;
+    border: 3px solid var(--accent-blue);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
+  .science-main h3 {
+    color: var(--accent-yellow);
+    font-size: clamp(1.3rem, 3.5vw, 1.8rem);
+    margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem;
+  }
+  .science-main .term { color: var(--accent-blue); font-weight: bold; }
+
+  .analogy-btn {
+    display: inline-block; margin-top: 1rem;
+    padding: 0.6rem 1.5rem; background: var(--accent-warm);
+    color: white; border: none; border-radius: 30px;
+    font-family: inherit; font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+    cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+  }
+  .analogy-btn:active { transform: scale(0.95); }
+  .analogy-box {
+    margin-top: 1rem; background: var(--analogy-bg); color: white;
+    padding: clamp(1rem, 2.5vw, 1.5rem); border-radius: 16px;
+    font-size: clamp(1rem, 2.5vw, 1.3rem); line-height: 1.8;
+    display: none; animation: slideDown 0.4s ease;
+    border: 2px dashed var(--accent-yellow);
+  }
+  .analogy-box.show { display: block; }
+  @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+  .analogy-box .emoji { font-size: 1.5em; }
+
+  /* Quiz Panel */
+  .quiz-panel {
+    position: relative; z-index: 10; width: 85%; max-width: 900px;
+  }
+  .quiz-main {
+    background: var(--quiz-bg); color: var(--text-primary);
+    padding: clamp(1.2rem, 3vw, 2rem) clamp(1.5rem, 4vw, 2.5rem);
+    border-radius: 20px; font-size: clamp(1rem, 2.5vw, 1.4rem); line-height: 2;
+    border: 3px solid var(--accent-yellow);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
+  .quiz-main h3 {
+    color: var(--accent-yellow);
+    font-size: clamp(1.3rem, 3.5vw, 1.8rem);
+    margin-bottom: 0.8rem;
+  }
+  .quiz-question {
+    font-size: clamp(1.1rem, 2.8vw, 1.5rem);
+    margin-bottom: 1rem; line-height: 1.8;
+  }
+  .quiz-options { display: flex; flex-direction: column; gap: 0.8rem; margin-top: 0.5rem; }
+  .quiz-option {
+    padding: 0.8rem 1.2rem; border-radius: 16px; cursor: pointer;
+    font-family: inherit; font-size: clamp(1rem, 2.5vw, 1.3rem);
+    border: 3px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1);
+    color: var(--text-primary); transition: all 0.3s; text-align: left;
+  }
+  .quiz-option:active { transform: scale(0.97); }
+  .quiz-option.correct {
+    background: rgba(46, 204, 113, 0.3); border-color: #2ecc71;
+    animation: correctPulse 0.5s ease;
+  }
+  .quiz-option.wrong {
+    background: rgba(231, 76, 60, 0.3); border-color: #e74c3c;
+    animation: shake 0.5s ease;
+  }
+  .quiz-option.disabled { pointer-events: none; opacity: 0.5; }
+  @keyframes correctPulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+  @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+
+  .quiz-feedback {
+    margin-top: 1rem; padding: 0.8rem 1.2rem; border-radius: 12px;
+    font-size: clamp(1rem, 2.5vw, 1.3rem); line-height: 1.6;
+    display: none; animation: slideDown 0.4s ease;
+  }
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.success { background: rgba(46, 204, 113, 0.2); border: 2px solid #2ecc71; }
+  .quiz-feedback.hint { background: rgba(241, 196, 15, 0.2); border: 2px solid #f1c40f; }
+
+  /* Gravity Jump Interactive */
+  .gravity-demo {
+    position: relative; z-index: 10; width: 85%; max-width: 700px;
+    display: flex; gap: 1rem; justify-content: center; align-items: flex-end;
+    height: 55vh;
+  }
+  .planet-column {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    position: relative; height: 100%;
+  }
+  .planet-label {
+    font-size: clamp(1.2rem, 3vw, 1.6rem); color: var(--accent-yellow);
+    margin-bottom: 0.5rem; text-align: center; position: absolute; top: 0;
+  }
+  .jump-track {
+    width: 100%; flex: 1; position: relative;
+    background: linear-gradient(to top, rgba(255,255,255,0.05) 0%, transparent 100%);
+    border-radius: 16px; margin-top: 2.5rem;
+  }
+  .jump-track .ruler {
+    position: absolute; right: 5px; top: 0; height: 100%; width: 20px;
+    display: flex; flex-direction: column-reverse; justify-content: space-between;
+  }
+  .ruler-mark {
+    font-size: 0.7rem; color: rgba(255,255,255,0.3); text-align: right;
+  }
+  .jumper {
+    position: absolute; bottom: 5%; left: 50%; transform: translateX(-50%);
+    font-size: clamp(2.5rem, 7vw, 4rem); cursor: pointer;
+    transition: bottom 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    z-index: 5;
+  }
+  .jumper.jumping {
+    animation: none;
+  }
+  .ground-line {
+    position: absolute; bottom: 5%; left: 10%; right: 10%;
+    border-top: 2px dashed rgba(255,255,255,0.2);
+  }
+  .height-label {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    font-size: clamp(1rem, 2.5vw, 1.4rem); color: var(--accent-yellow);
+    opacity: 0; transition: opacity 0.3s; font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  }
+  .jump-btn {
+    margin-top: 0.5rem; padding: 0.6rem 1.5rem;
+    background: var(--accent-warm); color: white; border: none; border-radius: 30px;
+    font-family: inherit; font-size: clamp(1rem, 2.5vw, 1.3rem);
+    cursor: pointer; z-index: 10; position: relative;
+  }
+  .jump-btn:active { transform: scale(0.95); }
+  .jump-instruction {
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; text-align: center;
+    font-size: clamp(1rem, 2.5vw, 1.3rem); color: var(--accent-yellow);
+    z-index: 20;
+  }
+
+  /* Oxygen Slider */
+  .oxygen-game {
+    position: relative; z-index: 10; width: 85%; max-width: 800px;
+    background: rgba(0,0,0,0.5); border-radius: 20px; padding: clamp(1rem, 3vw, 2rem);
+    border: 3px solid var(--accent-blue);
+  }
+  .oxygen-question {
+    font-size: clamp(1.1rem, 2.8vw, 1.5rem); color: var(--text-primary);
+    line-height: 1.8; margin-bottom: 1rem;
+  }
+  .oxygen-visual {
+    display: flex; align-items: center; gap: 0.5rem; margin: 1rem 0;
+    flex-wrap: wrap; justify-content: center;
+  }
+  .walk-step {
+    width: clamp(3rem, 8vw, 5rem); height: clamp(3rem, 8vw, 5rem);
+    border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    font-size: clamp(1.5rem, 4vw, 2.5rem); cursor: pointer;
+    border: 3px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.05);
+    transition: all 0.3s;
+  }
+  .walk-step.walked {
+    background: rgba(78, 205, 196, 0.3); border-color: var(--accent-blue);
+  }
+  .walk-step.current {
+    border-color: var(--accent-yellow); animation: pulse 1s infinite;
+    background: rgba(255, 230, 109, 0.15);
+  }
+  .oxygen-bar {
+    width: 100%; height: 30px; background: rgba(255,255,255,0.1);
+    border-radius: 15px; overflow: hidden; margin: 1rem 0; position: relative;
+  }
+  .oxygen-fill {
+    height: 100%; background: linear-gradient(90deg, #e74c3c, #2ecc71);
+    border-radius: 15px; transition: width 0.5s ease;
+    display: flex; align-items: center; justify-content: flex-end; padding-right: 8px;
+  }
+  .oxygen-text {
+    font-size: 0.8rem; color: white; font-weight: bold;
+  }
+  .oxygen-result {
+    font-size: clamp(1.1rem, 2.8vw, 1.4rem); color: var(--accent-yellow);
+    text-align: center; margin-top: 0.5rem; min-height: 2em;
+  }
+
+  /* Wind Speed Compare */
+  .wind-compare {
+    position: relative; z-index: 10; width: 85%; max-width: 800px;
+    background: rgba(0,0,0,0.5); border-radius: 20px; padding: clamp(1rem, 3vw, 2rem);
+    border: 3px solid var(--accent-warm);
+  }
+  .wind-question {
+    font-size: clamp(1.1rem, 2.8vw, 1.5rem); color: var(--text-primary);
+    line-height: 1.8; margin-bottom: 1rem;
+  }
+  .speed-bars {
+    display: flex; flex-direction: column; gap: 1.5rem; margin: 1rem 0;
+  }
+  .speed-row {
+    display: flex; align-items: center; gap: 0.8rem;
+  }
+  .speed-icon { font-size: clamp(1.8rem, 5vw, 3rem); min-width: 3rem; text-align: center; }
+  .speed-track {
+    flex: 1; height: 24px; background: rgba(255,255,255,0.1);
+    border-radius: 12px; overflow: hidden; position: relative;
+  }
+  .speed-fill {
+    height: 100%; border-radius: 12px; transition: width 1.5s ease;
+    display: flex; align-items: center; padding-left: 8px;
+  }
+  .speed-fill.bike { background: linear-gradient(90deg, #4ecdc4, #44b8ab); width: 0; }
+  .speed-fill.storm { background: linear-gradient(90deg, #e74c3c, #c0392b); width: 0; }
+  .speed-label {
+    font-size: clamp(0.8rem, 2vw, 1rem); color: white; font-weight: bold; white-space: nowrap;
+  }
+  .wind-slider-area {
+    margin-top: 1.5rem; text-align: center;
+  }
+  .wind-prompt {
+    font-size: clamp(1rem, 2.5vw, 1.3rem); color: var(--accent-yellow); margin-bottom: 0.8rem;
+  }
+  .wind-options {
+    display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap;
+  }
+  .wind-opt {
+    padding: 0.8rem 1.5rem; border-radius: 30px; cursor: pointer;
+    font-family: inherit; font-size: clamp(1.2rem, 3vw, 1.6rem);
+    border: 3px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1);
+    color: var(--text-primary); transition: all 0.3s; min-width: 4rem; text-align: center;
+  }
+  .wind-opt:active { transform: scale(0.95); }
+  .wind-opt.correct { background: rgba(46, 204, 113, 0.3); border-color: #2ecc71; }
+  .wind-opt.wrong { background: rgba(231, 76, 60, 0.3); border-color: #e74c3c; }
+  .wind-result {
+    font-size: clamp(1rem, 2.5vw, 1.3rem); color: var(--accent-yellow);
+    margin-top: 1rem; min-height: 2em;
+  }
+
+  /* Navigation */
+  .nav-area {
+    position: absolute; top: 0; width: 25%; height: 100%; z-index: 50; cursor: pointer;
+  }
+  .nav-area.left { left: 0; }
+  .nav-area.right { right: 0; }
+  .nav-hint {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    font-size: 2.5rem; color: white; opacity: 0; transition: opacity 0.3s; pointer-events: none;
+  }
+  .nav-area:hover .nav-hint { opacity: 0.5; }
+  .nav-area.left .nav-hint { left: 1rem; }
+  .nav-area.right .nav-hint { right: 1rem; }
+
+  /* Page Counter */
+  .page-counter {
+    position: fixed; bottom: 1.5%; left: 50%; transform: translateX(-50%);
+    z-index: 100; display: flex; gap: 8px;
+  }
+  .page-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: rgba(255,255,255,0.3); transition: all 0.3s;
+  }
+  .page-dot.active { background: var(--accent-yellow); transform: scale(1.3); }
+
+  /* Potato Counter (persistent) */
+  .potato-counter {
+    position: fixed; top: 1.5%; right: 1.5%; z-index: 200;
+    background: rgba(0,0,0,0.6); padding: 0.4rem 0.8rem; border-radius: 20px;
+    font-size: clamp(0.9rem, 2.5vw, 1.2rem); color: var(--accent-yellow);
+    border: 2px solid rgba(255,230,109,0.3);
+    display: none;
+  }
+  .potato-counter.show { display: block; }
+
+  /* Content positioning */
+  .content-bottom {
+    position: absolute; bottom: 8%; width: 100%;
+    display: flex; flex-direction: column; align-items: center; z-index: 10;
+  }
+  .content-center {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 100%; display: flex; flex-direction: column; align-items: center; z-index: 10;
+  }
+
+  /* Mars surface */
+  .mars-surface {
+    position: absolute; bottom: 0; left: 0; width: 100%; height: 30%;
+    background: linear-gradient(to top, #8B3A2A 0%, #a0522d 40%, transparent 100%);
+    z-index: 1;
+  }
+
+  /* Responsive */
+  @media (orientation: portrait) {
+    .text-bubble { max-width: 90%; }
+    .science-panel, .quiz-panel { width: 92%; }
+    .gravity-demo { height: 50vh; }
+  }
+  @media (max-width: 600px) {
+    .gravity-demo { flex-direction: column; height: auto; gap: 1.5rem; }
+    .planet-column { height: 30vh; width: 80%; }
+    .planet-label { position: relative; }
+    .jump-track { margin-top: 0.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="book" id="book">
+
+  <!-- Page 0: Cover -->
+  <div class="page cover active" data-page="0">
+    <div class="stars" id="cover-stars"></div>
+    <div class="cover-title">🥔 火星种土豆</div>
+    <div class="cover-subtitle">根据电影《火星救援》改编</div>
+    <div class="cover-chapter">第一章 · 暴风来了！</div>
+    <div class="cover-tap">👆 点击右边翻页</div>
+  </div>
+
+  <!-- Page 1: The Storm -->
+  <div class="page" data-page="1" style="background: linear-gradient(180deg, #2d1b1b 0%, #4a1a1a 50%, #8B3A2A 100%);">
+    <div class="stars" id="storm-stars"></div>
+    <div id="dust-container" class="stars"></div>
+    <div class="content-bottom">
+      <div class="text-bubble narrator">
+        火星上突然刮起了<span class="highlight">超级大风暴</span>！🌪️<br><br>
+        天空变成了一片红色，沙子打在宇航服上噼里啪啦响。<br><br>
+        宇航员<span class="highlight">马克·沃特尼</span>和他的五个队友<br>
+        正在火星上做科学实验——<br><br>
+        但这场风暴太大了，他们<span class="highlight">必须马上撤离</span>！🚀
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 2: Mark Gets Hit -->
+  <div class="page" data-page="2" style="background: linear-gradient(180deg, #1a0a0a 0%, #4a1a1a 50%, #2d1b1b 100%);">
+    <div id="dust-container-2" class="stars"></div>
+    <div class="content-bottom">
+      <div class="text-bubble narrator">
+        他们跑向飞船，准备起飞——<br><br>
+        <span style="font-size: 1.3em;">💥 砰！</span><br><br>
+        一根天线被风吹断，<span class="highlight">砸中了马克</span>！<br><br>
+        马克倒在了沙地上。<br>
+        其他队友找不到他，风暴太大，什么都看不见……<br><br>
+        他们以为马克<span class="highlight">已经不行了</span>，<br>
+        含着眼泪起飞，离开了火星。😢
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 3: Mark Wakes Up -->
+  <div class="page" data-page="3" style="background: linear-gradient(180deg, #1a0a0a 0%, #3d1a1a 50%, #8B3A2A 100%);">
+    <div class="mars-surface"></div>
+    <div class="content-bottom">
+      <div class="text-bubble mark">
+        ……<br><br>
+        不知道过了多久，马克<span class="highlight">醒了</span>。<br><br>
+        "嘀——嘀——嘀——" 宇航服在报警：<br>
+        <span class="highlight-blue">⚠️ 氧气不足！</span><br><br>
+        马克低头一看——天线扎进了宇航服，<br>
+        但他还活着！<br><br>
+        他抬头看看天空……飞船的灯光？<br>
+        <span class="highlight">没有了。队友们走了。</span><br><br>
+        马克是火星上<span class="highlight">唯一的人类</span>。
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 4: Science — Mars vs Earth -->
+  <div class="page" data-page="4" style="background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);">
+    <div class="stars" id="science-stars-1"></div>
+    <div class="content-center">
+      <div class="science-panel">
+        <div class="science-main">
+          <h3>🔬 科学时间：火星 vs 地球</h3>
+          <p>
+            火星比地球<span class="term">小得多</span>！<br>
+            如果地球是一个<span class="term">🏀 篮球</span>，<br>
+            火星就像一个<span class="term">🎾 网球</span>。
+          </p>
+          <p>
+            火星的<span class="term">引力</span>只有地球的 <span class="term">三分之一</span>——<br>
+            引力就是把你拉住不让你飘走的力量。<br>
+            引力小，你就能跳得更高！
+          </p>
+          <p>
+            在地球上跳 30 厘米，在火星上能跳 <span class="term">90 厘米</span>！<br>
+            <span style="font-size:0.85em; opacity:0.7;">（30 × 3 = 90）</span>
+          </p>
+
+          <button class="analogy-btn" onclick="toggleAnalogy('analogy-gravity')">
+            🤔 引力是什么？点这里看比喻
+          </button>
+
+          <div class="analogy-box" id="analogy-gravity">
+            <span class="emoji">🧲</span> 想象地球是一块<b>超级大的磁铁</b>——<br>
+            它把所有东西都往自己身上吸：人、房子、水……<br><br>
+            地球这块"磁铁"很强，所以你跳起来<b>很快就落下来</b>。<br><br>
+            火星这块"磁铁"只有地球的<b>三分之一强</b>——<br>
+            所以你跳起来，会飘得更高、落得更慢 <span class="emoji">🦘</span><br><br>
+            月球的引力更小，只有地球的<b>六分之一</b>！<br>
+            所以宇航员在月球上走路像在<b>蹦蹦跳跳</b> <span class="emoji">🌙</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 5: Interactive — Gravity Jump -->
+  <div class="page" data-page="5" style="background: linear-gradient(180deg, #0a0a2e 0%, #1a1a3e 50%, #0f0c29 100%);">
+    <div class="stars" id="jump-stars"></div>
+    <p class="jump-instruction">👆 点"跳！"看看在不同星球上能跳多高</p>
+    <div class="gravity-demo">
+      <div class="planet-column">
+        <div class="planet-label">🌍 地球</div>
+        <div class="jump-track" id="track-earth">
+          <div class="ground-line"></div>
+          <div class="jumper" id="jumper-earth">🧒</div>
+          <div class="height-label" id="label-earth">30 厘米</div>
+        </div>
+      </div>
+      <div class="planet-column">
+        <div class="planet-label">🔴 火星</div>
+        <div class="jump-track" id="track-mars">
+          <div class="ground-line"></div>
+          <div class="jumper" id="jumper-mars">🧒</div>
+          <div class="height-label" id="label-mars">??? 厘米</div>
+        </div>
+      </div>
+    </div>
+    <button class="jump-btn" id="jump-btn" onclick="doJump()">🦘 跳！</button>
+  </div>
+
+  <!-- Page 6: Science — Mars Air -->
+  <div class="page" data-page="6" style="background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);">
+    <div class="stars" id="science-stars-2"></div>
+    <div class="content-center">
+      <div class="science-panel">
+        <div class="science-main">
+          <h3>🔬 科学时间：火星的空气</h3>
+          <p>
+            火星有空气吗？<span class="term">有！但非常非常薄。</span>
+          </p>
+          <p>
+            地球的空气就像一床<span class="term">厚棉被</span> 🛏️——<br>
+            厚厚的，包住我们，让我们呼吸。<br><br>
+            火星的空气就像一张<span class="term">薄纸巾</span> 🧻——<br>
+            薄到几乎没有。
+          </p>
+          <p>
+            而且火星空气里 96% 都是<span class="term">二氧化碳</span>（CO₂）——<br>
+            我们呼出去的废气！人根本<span class="term">没法呼吸</span>。<br>
+            所以宇航员必须一直穿着<span class="term">宇航服</span>，<br>
+            靠宇航服里的氧气罐呼吸 🧑‍🚀
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 7: Quiz — Mars Air -->
+  <div class="page" data-page="7" style="background: linear-gradient(180deg, #0d1b2a 0%, #1b2838 100%);">
+    <div class="stars" id="quiz-stars-1"></div>
+    <div class="content-center">
+      <div class="quiz-panel">
+        <div class="quiz-main">
+          <h3>🧠 动脑时间</h3>
+          <div class="quiz-question">
+            在火星上，如果马克<b>不穿宇航服</b>走出基地，会怎样？
+          </div>
+          <div class="quiz-options" id="quiz-air">
+            <div class="quiz-option" onclick="checkQuiz('quiz-air', this, false)">
+              A. 有点冷，但没什么大事 🤷
+            </div>
+            <div class="quiz-option" onclick="checkQuiz('quiz-air', this, true)">
+              B. 无法呼吸，非常危险！☠️
+            </div>
+            <div class="quiz-option" onclick="checkQuiz('quiz-air', this, false)">
+              C. 跟在地球上一样，没区别 😊
+            </div>
+          </div>
+          <div class="quiz-feedback" id="quiz-air-feedback"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 8: Mark's Problem — Oxygen Countdown -->
+  <div class="page" data-page="8" style="background: linear-gradient(180deg, #1a0a0a 0%, #3d1a1a 50%, #8B3A2A 100%);">
+    <div class="mars-surface"></div>
+    <div class="content-bottom">
+      <div class="text-bubble mark">
+        马克看了一眼宇航服上的显示屏：<br><br>
+        🔋 <span class="highlight-blue">氧气：还剩 4 小时</span><br><br>
+        基地在 <span class="highlight">2 公里</span> 外。<br>
+        穿着厚重的宇航服，<br>
+        他每小时只能走 <span class="highlight">1 公里</span>。<br><br>
+        马克深吸一口气：<br>
+        <span class="highlight">"我必须走回基地。算一算，来得及吗？"</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 9: Interactive — Oxygen Walk -->
+  <div class="page" data-page="9" style="background: linear-gradient(180deg, #0d1b2a 0%, #1b2838 50%, #3d1a1a 100%);">
+    <div class="content-center">
+      <div class="oxygen-game">
+        <div class="oxygen-question">
+          🧑‍🚀 帮马克走回基地！<br>
+          氧气 <span class="highlight">4 小时</span>，距离 <span class="highlight-blue">2 公里</span>，每小时走 <span class="highlight-blue">1 公里</span><br><br>
+          👆 点击脚印走一步（每步 = 1公里 = 1小时）
+        </div>
+
+        <div class="oxygen-visual" id="oxygen-visual">
+          <div class="walk-step current" id="step-0" onclick="walkStep(0)">
+            🧑‍🚀<br><span style="font-size:0.5em">出发</span>
+          </div>
+          <div style="font-size:1.5rem; color:rgba(255,255,255,0.3);">→</div>
+          <div class="walk-step" id="step-1" onclick="walkStep(1)">
+            👣<br><span style="font-size:0.5em">1公里</span>
+          </div>
+          <div style="font-size:1.5rem; color:rgba(255,255,255,0.3);">→</div>
+          <div class="walk-step" id="step-2" onclick="walkStep(2)">
+            🏠<br><span style="font-size:0.5em">基地!</span>
+          </div>
+        </div>
+
+        <div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:0.3rem;">
+            <span style="font-size:0.9rem; color:var(--accent-blue);">🫁 氧气</span>
+            <span style="font-size:0.9rem; color:var(--text-primary);" id="oxygen-time">4 小时</span>
+          </div>
+          <div class="oxygen-bar">
+            <div class="oxygen-fill" id="oxygen-fill" style="width: 100%;">
+              <span class="oxygen-text">100%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="oxygen-result" id="oxygen-result"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 10: Wind Speed Compare -->
+  <div class="page" data-page="10" style="background: linear-gradient(180deg, #2d1b1b 0%, #4a1a1a 50%, #1a0a0a 100%);">
+    <div id="dust-container-3" class="stars"></div>
+    <div class="content-center">
+      <div class="wind-compare">
+        <div class="wind-question">
+          🌪️ 火星风暴到底有多快？<br><br>
+          火星风暴时速 <span class="highlight">150 公里</span><br>
+          你骑自行车大约时速 <span class="highlight-blue">15 公里</span>
+        </div>
+
+        <div class="speed-bars">
+          <div class="speed-row">
+            <div class="speed-icon">🚲</div>
+            <div class="speed-track">
+              <div class="speed-fill bike" id="bike-bar">
+                <span class="speed-label">15 km/h</span>
+              </div>
+            </div>
+          </div>
+          <div class="speed-row">
+            <div class="speed-icon">🌪️</div>
+            <div class="speed-track">
+              <div class="speed-fill storm" id="storm-bar">
+                <span class="speed-label">150 km/h</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="wind-slider-area">
+          <div class="wind-prompt">🤔 火星风暴比骑自行车快几倍？</div>
+          <div class="wind-options" id="wind-options">
+            <div class="wind-opt" onclick="checkWind(this, 5)">5倍</div>
+            <div class="wind-opt" onclick="checkWind(this, 10)">10倍</div>
+            <div class="wind-opt" onclick="checkWind(this, 15)">15倍</div>
+            <div class="wind-opt" onclick="checkWind(this, 20)">20倍</div>
+          </div>
+          <div class="wind-result" id="wind-result"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 11: Mark Reaches Base -->
+  <div class="page" data-page="11" style="background: linear-gradient(180deg, #1a0a0a 0%, #3d2a1a 50%, #8B3A2A 100%);">
+    <div class="mars-surface"></div>
+    <div class="content-bottom">
+      <div class="text-bubble mark">
+        马克一步一步，终于走回了基地。<br><br>
+        他关上气密门，脱下宇航服，<br>
+        <span class="highlight">大口大口地呼吸</span>基地里的氧气。<br><br>
+        "好……我活下来了。" 🥵<br><br>
+        但接下来怎么办？<br>
+        队友走了。地球不知道他还活着。<br>
+        下一艘飞船要 <span class="highlight">400 天</span> 才会来。<br><br>
+        马克看了看基地里的食物……<br>
+        <span class="highlight">"我得算算，够不够吃。"</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 12: End -->
+  <div class="page" data-page="12" style="background: linear-gradient(180deg, #000 0%, #1a0a2e 50%, #2d1b69 100%);">
+    <div class="stars" id="end-stars"></div>
+    <div class="content-center">
+      <div class="text-bubble narrator" style="text-align: center;">
+        马克成为了<span class="highlight">火星上唯一的人类</span>。🧑‍🚀<br><br>
+        他只有自己的<span class="highlight">大脑</span>和<span class="highlight-blue">科学知识</span>——<br>
+        能帮他活下去。<br><br>
+        <span style="font-size: 1.3em;">下一章：一个人的火星</span><br>
+        <span style="font-size: 0.9em; opacity: 0.6;">马克要清点食物，算算能撑多久……<br>
+        结果发现远远不够！😱</span><br><br>
+        <a href="ch2.html" style="display:inline-block;margin-top:0.5rem;padding:0.8rem 2rem;background:var(--accent-warm);color:#fff;border-radius:30px;text-decoration:none;font-size:1.1em;box-shadow:0 4px 12px rgba(255,107,53,0.4);">
+          下一章 →
+        </a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Potato Counter -->
+<div class="potato-counter" id="potato-counter">🥔 × <span id="potato-count">0</span></div>
+
+<!-- Navigation -->
+<div class="nav-area left" onclick="prevPage()"><div class="nav-hint">‹</div></div>
+<div class="nav-area right" onclick="nextPage()"><div class="nav-hint">›</div></div>
+<div class="page-counter" id="page-counter"></div>
+
+<script>
+  // === Book Engine ===
+  const pages = document.querySelectorAll('.page');
+  let currentPage = 0;
+  let potatoes = 0;
+
+  const counter = document.getElementById('page-counter');
+  pages.forEach((_, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'page-dot' + (i === 0 ? ' active' : '');
+    counter.appendChild(dot);
+  });
+
+  function goToPage(n) {
+    if (n < 0 || n >= pages.length) return;
+    pages[currentPage].className = 'page' + (n > currentPage ? ' prev' : '');
+    currentPage = n;
+    pages[currentPage].className = 'page active';
+    document.querySelectorAll('.page-dot').forEach((d, i) => {
+      d.className = 'page-dot' + (i === currentPage ? ' active' : '');
+    });
+    // Trigger page-specific animations
+    if (currentPage === 10) animateWindBars();
+  }
+
+  function nextPage() { goToPage(currentPage + 1); }
+  function prevPage() { goToPage(currentPage - 1); }
+
+  // Swipe
+  let touchStartX = 0;
+  document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+  document.addEventListener('touchend', e => {
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) { diff > 0 ? nextPage() : prevPage(); }
+  });
+
+  // Keyboard
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') nextPage();
+    if (e.key === 'ArrowLeft') prevPage();
+  });
+
+  // === Stars ===
+  function createStars(containerId, count = 80) {
+    const c = document.getElementById(containerId);
+    if (!c) return;
+    for (let i = 0; i < count; i++) {
+      const s = document.createElement('div');
+      s.className = 'star';
+      const size = Math.random() * 3 + 1;
+      s.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--duration:${Math.random()*3+2}s;animation-delay:${Math.random()*3}s;`;
+      c.appendChild(s);
+    }
+  }
+  createStars('cover-stars', 120);
+  createStars('storm-stars', 40);
+  createStars('science-stars-1', 60);
+  createStars('jump-stars', 80);
+  createStars('science-stars-2', 60);
+  createStars('quiz-stars-1', 50);
+  createStars('end-stars', 100);
+
+  // === Dust Particles ===
+  function createDust(containerId, count = 30) {
+    const c = document.getElementById(containerId);
+    if (!c) return;
+    for (let i = 0; i < count; i++) {
+      const d = document.createElement('div');
+      d.className = 'dust-particle';
+      const size = Math.random() * 4 + 2;
+      const hue = 15 + Math.random() * 20;
+      d.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;background:hsl(${hue},70%,50%);--dust-dur:${Math.random()*6+4}s;--dx:${(Math.random()-0.5)*300}px;--dy:${(Math.random()-0.5)*200}px;animation-delay:${Math.random()*5}s;`;
+      c.appendChild(d);
+    }
+  }
+  createDust('dust-container', 40);
+  createDust('dust-container-2', 30);
+  createDust('dust-container-3', 25);
+
+  // === Potato System ===
+  function addPotato(n = 1) {
+    potatoes += n;
+    document.getElementById('potato-count').textContent = potatoes;
+    document.getElementById('potato-counter').classList.add('show');
+    // Save to localStorage
+    try { localStorage.setItem('mars-potatoes', potatoes); } catch(e) {}
+  }
+  // Restore potatoes
+  try {
+    const saved = localStorage.getItem('mars-potatoes');
+    if (saved) { potatoes = parseInt(saved); document.getElementById('potato-count').textContent = potatoes; document.getElementById('potato-counter').classList.add('show'); }
+  } catch(e) {}
+
+  // === Gravity Jump ===
+  let jumpDone = false;
+  function doJump() {
+    if (jumpDone) return;
+    jumpDone = true;
+    const btn = document.getElementById('jump-btn');
+    btn.textContent = '🎉 看到区别了吗？';
+    btn.style.background = '#2ecc71';
+
+    const earthJumper = document.getElementById('jumper-earth');
+    const marsJumper = document.getElementById('jumper-mars');
+    const earthLabel = document.getElementById('label-earth');
+    const marsLabel = document.getElementById('label-mars');
+
+    // Earth: jump to 25% height (30cm)
+    earthJumper.style.bottom = '30%';
+    earthLabel.style.bottom = '32%';
+    earthLabel.style.opacity = '1';
+
+    // Mars: jump to 65% height (90cm) — 3x higher
+    marsJumper.style.bottom = '70%';
+    marsLabel.textContent = '90 厘米！';
+    marsLabel.style.bottom = '72%';
+    marsLabel.style.opacity = '1';
+    marsLabel.style.color = '#2ecc71';
+
+    // Fall back down after a moment
+    setTimeout(() => {
+      earthJumper.style.bottom = '5%';
+      earthLabel.style.opacity = '0';
+    }, 1800);
+    setTimeout(() => {
+      marsJumper.style.bottom = '5%';
+      marsLabel.style.opacity = '0';
+    }, 2800); // Mars falls slower!
+
+    setTimeout(() => {
+      btn.textContent = '🦘 再跳一次！';
+      btn.style.background = 'var(--accent-warm)';
+      jumpDone = false;
+    }, 3500);
+  }
+
+  // === Quiz System ===
+  function checkQuiz(quizId, el, correct) {
+    const options = document.querySelectorAll(`#${quizId} .quiz-option`);
+    const feedback = document.getElementById(`${quizId}-feedback`);
+
+    if (correct) {
+      el.classList.add('correct');
+      options.forEach(o => { if (o !== el) o.classList.add('disabled'); });
+      feedback.className = 'quiz-feedback show success';
+      feedback.innerHTML = '✅ <b>没错！</b>火星空气几乎全是二氧化碳，而且非常稀薄。<br>不穿宇航服在火星上不到1分钟就会失去意识！<br>宇航服就像一个随身携带的小房子 🏠';
+      addPotato(1);
+    } else {
+      el.classList.add('wrong');
+      feedback.className = 'quiz-feedback show hint';
+      feedback.innerHTML = '💡 再想想！记住，火星的空气像一张薄纸巾，而且几乎全是二氧化碳……人能呼吸二氧化碳吗？';
+      setTimeout(() => {
+        el.classList.remove('wrong');
+        feedback.className = 'quiz-feedback';
+      }, 2000);
+    }
+  }
+
+  // === Oxygen Walk ===
+  let walkProgress = 0;
+  function walkStep(step) {
+    if (step !== walkProgress + 1 && step !== 0) return;
+    if (step === 0) return; // starting position
+    if (walkProgress >= 2) return; // already done
+
+    walkProgress = step;
+    const oxygenLevels = [100, 75, 50];
+    const oxygenHours = [4, 3, 2];
+
+    document.getElementById(`step-${step}`).classList.add('walked');
+    if (step < 2) document.getElementById(`step-${step + 1}`).classList.add('current');
+    document.getElementById(`step-${step - 1}`).classList.remove('current');
+
+    const fill = document.getElementById('oxygen-fill');
+    fill.style.width = oxygenLevels[step] + '%';
+    fill.querySelector('.oxygen-text').textContent = oxygenLevels[step] + '%';
+    document.getElementById('oxygen-time').textContent = oxygenHours[step] + ' 小时';
+
+    if (step >= 2) {
+      document.getElementById('oxygen-result').innerHTML =
+        '🎉 <b>到了！</b>走了 2 小时到基地，氧气还剩 <b>2 小时</b>！<br>' +
+        '<span style="font-size:0.9em">4 - 2 = 2 ✅ 马克安全到达！</span>';
+      addPotato(1);
+    }
+  }
+
+  // === Wind Speed ===
+  let windAnimated = false;
+  function animateWindBars() {
+    if (windAnimated) return;
+    windAnimated = true;
+    setTimeout(() => {
+      document.getElementById('bike-bar').style.width = '10%';
+      document.getElementById('storm-bar').style.width = '100%';
+    }, 300);
+  }
+
+  let windAnswered = false;
+  function checkWind(el, value) {
+    if (windAnswered) return;
+    const result = document.getElementById('wind-result');
+    const opts = document.querySelectorAll('.wind-opt');
+
+    if (value === 10) {
+      windAnswered = true;
+      el.classList.add('correct');
+      opts.forEach(o => { if (o !== el) o.style.opacity = '0.4'; });
+      result.innerHTML = '🎉 <b>对了！</b>150 ÷ 15 = <b>10 倍</b>！<br>想象 10 个你骑车的速度叠在一起——那就是火星风暴 🌪️';
+      addPotato(1);
+    } else {
+      el.classList.add('wrong');
+      result.innerHTML = '💡 再想想！150 里面有几个 15？<br>试试用 150 ÷ 15 算一算 🤔';
+      setTimeout(() => { el.classList.remove('wrong'); result.innerHTML = ''; }, 2000);
+    }
+  }
+
+  // === Science Analogy Toggle ===
+  function toggleAnalogy(id) {
+    const box = document.getElementById(id);
+    box.classList.toggle('show');
+    const btn = box.previousElementSibling;
+    btn.textContent = box.classList.contains('show') ? '📖 收起比喻' : '🤔 引力是什么？点这里看比喻';
+  }
+</script>
+
+</body>
+</html>

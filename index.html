@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🥔 火星种土豆 — 互动绘本</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'ZCOOL KuaiLe', sans-serif;
+    background: linear-gradient(135deg, #1a0a0a, #2d1b1b);
+    color: #f5f0e8; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 2rem 1rem;
+  }
+  h1 { font-size: clamp(2rem, 6vw, 3.5rem); color: #ffe66d; text-align: center; margin-bottom: 0.5rem; }
+  .subtitle { font-size: clamp(1rem, 3vw, 1.4rem); opacity: 0.7; margin-bottom: 2rem; text-align: center; }
+  .chapters { display: flex; flex-direction: column; gap: 1.2rem; width: 100%; max-width: 500px; }
+  .chapter-card {
+    display: flex; align-items: center; gap: 1rem;
+    background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.15);
+    border-radius: 20px; padding: 1.2rem 1.5rem;
+    text-decoration: none; color: #f5f0e8;
+    transition: all 0.3s; cursor: pointer;
+  }
+  .chapter-card:hover { background: rgba(255,255,255,0.15); transform: translateX(8px); border-color: #ffe66d; }
+  .chapter-card.locked { opacity: 0.4; pointer-events: none; }
+  .ch-icon { font-size: 2.5rem; }
+  .ch-info { flex: 1; }
+  .ch-title { font-size: clamp(1.1rem, 3vw, 1.4rem); color: #ffe66d; }
+  .ch-desc { font-size: clamp(0.85rem, 2.2vw, 1rem); opacity: 0.7; margin-top: 0.3rem; }
+  .ch-arrow { font-size: 1.5rem; opacity: 0.4; }
+  .footer { margin-top: 3rem; font-size: 0.85rem; opacity: 0.4; text-align: center; }
+</style>
+</head>
+<body>
+  <h1>🥔 火星种土豆</h1>
+  <div class="subtitle">根据电影《火星救援》改编 · 适合 7 岁小朋友</div>
+
+  <div class="chapters">
+    <a class="chapter-card" href="ch1.html">
+      <div class="ch-icon">🌪️</div>
+      <div class="ch-info">
+        <div class="ch-title">第一章：暴风来了！</div>
+        <div class="ch-desc">火星风暴、引力跳跃、氧气倒计时</div>
+      </div>
+      <div class="ch-arrow">→</div>
+    </a>
+    <div class="chapter-card locked">
+      <div class="ch-icon">🍽️</div>
+      <div class="ch-info">
+        <div class="ch-title">第二章：一个人的火星</div>
+        <div class="ch-desc">清点物资、卡路里、食物够吃几天？</div>
+      </div>
+      <div class="ch-arrow">🔒</div>
+    </div>
+    <div class="chapter-card locked">
+      <div class="ch-icon">🌱</div>
+      <div class="ch-info">
+        <div class="ch-title">第三章：火星农场</div>
+        <div class="ch-desc">光合作用、面积计算、种土豆！</div>
+      </div>
+      <div class="ch-arrow">🔒</div>
+    </div>
+    <div class="chapter-card locked">
+      <div class="ch-icon">📡</div>
+      <div class="ch-info">
+        <div class="ch-title">第四章：和地球说话</div>
+        <div class="ch-desc">太阳系、光速、信号延迟体验</div>
+      </div>
+      <div class="ch-arrow">🔒</div>
+    </div>
+    <div class="chapter-card locked">
+      <div class="ch-icon">🚗</div>
+      <div class="ch-info">
+        <div class="ch-title">第五章：长途旅行</div>
+        <div class="ch-desc">火星地貌、太阳能、路线规划</div>
+      </div>
+      <div class="ch-arrow">🔒</div>
+    </div>
+    <div class="chapter-card locked">
+      <div class="ch-icon">🏠</div>
+      <div class="ch-info">
+        <div class="ch-title">第六章：回家</div>
+        <div class="ch-desc">轨道、失重、太空对接！</div>
+      </div>
+      <div class="ch-arrow">🔒</div>
+    </div>
+  </div>
+
+  <div class="footer">和爸爸一起边吃土豆边看《火星救援》后制作 🥔</div>
+</body>
+</html>
